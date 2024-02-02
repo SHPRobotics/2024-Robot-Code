@@ -40,6 +40,7 @@ public class RobotContainer {
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  XboxController m_shooterController = new XboxController(OIConstants.kShooterControllerPort);//Added xbox controller for separateshooter controls
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -78,7 +79,7 @@ public class RobotContainer {
             () -> m_robotDrive.setX(),
             m_robotDrive));
 
-    new JoystickButton(m_driverController, Button.kR2.value)
+    new JoystickButton(m_shooterController, Button.kR2.value) //changed the shooting subsystem to m_shooterController
         .whileTrue(new RunCommand(
             () -> m_shooter.setSpeedHi(),
             m_robotDrive));

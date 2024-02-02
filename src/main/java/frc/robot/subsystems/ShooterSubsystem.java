@@ -20,7 +20,6 @@ import frc.robot.Constants.ShooterConstants;
 public class ShooterSubsystem extends SubsystemBase {
   private final CANSparkMax m_leftMotor, m_rightMotor;
   private final RelativeEncoder m_leftEncoder, m_rightEncoder;
-
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
     // motors
