@@ -59,20 +59,25 @@ public class ShooterSubsystem extends SubsystemBase {
 
   }
 
-  public void setSpeedHi(){
-    m_leftMotor.set(ShooterConstants.kShooterHiSpeed);
-    m_rightMotor.set(-ShooterConstants.kShooterHiSpeed);
+  public Command ShooterShootNoteOut(){
+    return runOnce(
+      () ->{
+        m_leftMotor.set(ShooterConstants.kShooterSpeed);
+        m_rightMotor.set(-ShooterConstants.kShooterSpeed);
+      }
+    );
   }
 
-
-  public void setSpeedLow(){
-    m_leftMotor.set(ShooterConstants.kShooterLowSpeed);
-    m_rightMotor.set(-ShooterConstants.kShooterLowSpeed);
+  public Command ShooterFeedNoteIn(){
+    return runOnce(
+      () ->{
+        m_leftMotor.set(-ShooterConstants.kShooterSpeed);
+        m_rightMotor.set(ShooterConstants.kShooterSpeed);
+      }
+    );
   }
 
-
-
-  public Command shooterStopCommand() {
+  public Command ShooterStop() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(

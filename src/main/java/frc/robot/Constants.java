@@ -121,6 +121,7 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
     public static final double kDriveDeadband = 0.05;
+    public static final int kDriveControllerPort = 0;
   }
 
   // ShooterConstants
@@ -131,29 +132,9 @@ public final class Constants {
 
     public static final IdleMode kShooterMotorIdleMode = IdleMode.kBrake;
     public static final int kShooterMotorCurrentLimit = 20; // amps
-
-    public static final double kP = 1;
-    public static final double kI = 0;
-    public static final double kD = 0;
-
-    public static final double kShooterToleranceRPS = 50;
-
-    public static final double kSVolts = 0.05;
-
-    private static final double kShooterFreeRPS = 5300;
-    public static final double kVVoltSecondPerRotation = 12.0 / kShooterFreeRPS;  // 12 Volt at free Speed
-
-    private static final double kWheelDiameterInches = 6;
-    private static final double kEncoderCPR = 1024.0;
-    public static final double kEncoderDistancePerPulse = (kWheelDiameterInches * Math.PI) / kEncoderCPR;
-
-    public static final double kShooterTargetRPS = 4000;
-
-    public static final double kShooterHiSpeed = 0.9;
-    public static final double kShooterLowSpeed = 0.4;
     
+    public static final double kShooterSpeed = 1.0;
   }
-
   
 
   // AutoConstants
@@ -177,4 +158,13 @@ public final class Constants {
     public static final double kFreeSpeedRpm = 5676;
   }
 
+  // InclinerConstants
+  public static final class InclinerConstants {
+    public static final int kInclinerMotorCANId = 7;
+	  public static final double kInclinerSpeed = 1.0;
+    public static final float kInclinerForwardLimit = 0;
+    public static final float kInclinerReverseLimit = 0;
+    
+  }
+  
 }

@@ -4,17 +4,47 @@
 
 package frc.robot.subsystems;
 
+
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.InclinerConstants;
 
+
+// Incliner subsystem is used to change the angle of the shooter
 public class InclinerSubsystem extends SubsystemBase {
-  private final CANSparkMax m_InclinerMotor = new CANSparkMax(,);
+  private final CANSparkMax m_inclinerMotor  = new CANSparkMax(InclinerConstants.kInclinerMotorCANId, MotorType.kBrushless);
+  private final RelativeEncoder m_inclinerEncoder = m_inclinerMotor.getEncoder();
+  
   /** Creates a new InclinerSubsystem. */
-  public InclinerSubsystem() {}
+  public InclinerSubsystem() {
+    // set the angle limit the incliner can move (forward, reveese direction)
+    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kForward, InclinerConstants.kInclinerForwardLimit);
+    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kReverse, InclinerConstants.kInclinerReverseLimit);
+
+    // enable the softlimits (forward, reverse direction)
+    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
+    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    // monitor the angle of the incliner
+    SmartDashboard.putNumber("Incliner Encoder value", m_inclinerEncoder.getPosition());
   }
+
+  public Command inclinerUp(){
+    return runOnce(()->m_inclinerMotor.set(InclinerConstants.kInclinerSpeed));
+  }
+
+  public Command inclinerDown(){
+    return runOnce(()->m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed));
+  }
+
 }

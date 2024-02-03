@@ -14,11 +14,12 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.InclinerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -38,13 +39,15 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   // Shooter subsystem
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
+  // Incliner subsystem
+  private final InclinerSubsystem m_incliner = new InclinerSubsystem();
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
   XboxController m_operatorController = new XboxController(OIConstants.kOperatorControllerPort); //Added xbox controller for separate operator controls
 
+  CommandXboxController m_cDriverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
   CommandXboxController m_cOperatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
-
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -65,7 +68,6 @@ public class RobotContainer {
                 true, true),
             m_robotDrive));
 
-    m_shooter.setDefaultCommand(m_shooter.shooterStopCommand());
   }
 
   /**
@@ -79,19 +81,37 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    // new JoystickButton(m_driverController, Button.kR1.value)
-    //     .whileTrue(new RunCommand(
-    //         () -> m_robotDrive.setX(),
-    //         m_robotDrive));
+    // -------------------------------- CHASSIS --------------------------------------------
+    // press X button to stop the robot
+    new JoystickButton(m_driverController, Button.kX.value)
+         .whileTrue(new RunCommand(
+             () -> m_robotDrive.setX(),
+             m_robotDrive));
 
-    // new JoystickButton(m_operatorController, Button.kR2.value) //changed the shooting subsystem to m_operatorController
-    //     .whileTrue(new RunCommand(
-    //         () -> m_shooter.setSpeedHi(),
-    //         m_shooter));
-
+    /*
     // shooter rotastor motor is connected to port 7
-    m_cOperatorController.rightTrigger() //added command to xbox controller for operator using command xbox code
-        .whileTrue(new RunCommand(()-> m_shooter.setSpeedHi(), m_shooter));
+    m_cDriverController.x() //added command to xbox controller for operator using command xbox code
+        .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
+    */
+
+    // --------------------------------SHOOTER -----------------------------------------------
+    // shoot the note out when press Y button
+    new JoystickButton(m_operatorController, Button.kY.value)
+         .whileTrue(new RunCommand(
+             () -> m_shooter.ShooterShootNoteOut(),
+             m_shooter));
+
+    // feed the note in when press A button
+    new JoystickButton(m_operatorController, Button.kA.value)
+         .whileTrue(new RunCommand(
+             () -> m_shooter.ShooterFeedNoteIn(),
+             m_shooter));
+
+    // --------------------------------INCLINER -----------------------------------------------
+    // incliner moves up when leftBumper is pressed
+    new JoystickButton((m_operatorController), Button.kLeftBumper.value)
+        .whileTrue(new RunCommand(() -> m_incliner.inclinerUp(), m_incliner));
+
   }
 
   /**
