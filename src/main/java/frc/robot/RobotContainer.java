@@ -23,6 +23,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
 
@@ -40,7 +41,10 @@ public class RobotContainer {
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-  XboxController m_shooterController = new XboxController(OIConstants.kShooterControllerPort);//Added xbox controller for separateshooter controls
+  XboxController m_operatorController = new XboxController(OIConstants.kOperatorControllerPort); //Added xbox controller for separate operator controls
+
+  CommandXboxController m_cOperatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
+
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,15 +78,20 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(m_driverController, Button.kR1.value)
-        .whileTrue(new RunCommand(
-            () -> m_robotDrive.setX(),
-            m_robotDrive));
 
-    new JoystickButton(m_shooterController, Button.kR2.value) //changed the shooting subsystem to m_shooterController
-        .whileTrue(new RunCommand(
-            () -> m_shooter.setSpeedHi(),
-            m_robotDrive));
+    // new JoystickButton(m_driverController, Button.kR1.value)
+    //     .whileTrue(new RunCommand(
+    //         () -> m_robotDrive.setX(),
+    //         m_robotDrive));
+
+    // new JoystickButton(m_operatorController, Button.kR2.value) //changed the shooting subsystem to m_operatorController
+    //     .whileTrue(new RunCommand(
+    //         () -> m_shooter.setSpeedHi(),
+    //         m_shooter));
+
+    // shooter rotastor motor is connected to port 7
+    m_cOperatorController.rightTrigger() //added command to xbox controller for operator using command xbox code
+        .whileTrue(new RunCommand(()-> m_shooter.setSpeedHi(), m_shooter));
   }
 
   /**
