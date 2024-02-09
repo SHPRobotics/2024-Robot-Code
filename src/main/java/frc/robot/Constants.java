@@ -161,7 +161,7 @@ public final class Constants {
   // InclinerConstants
   public static final class InclinerConstants {
     public static final int kInclinerMotorCANId = 7;
-	  public static final double kInclinerSpeed = 0.5;
+	  public static final double kInclinerSpeed = 0.2;
     public static final float kInclinerForwardLimit = 0;
     public static final float kInclinerReverseLimit = 0;
     
