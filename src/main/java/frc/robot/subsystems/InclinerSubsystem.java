@@ -59,4 +59,19 @@ public class InclinerSubsystem extends SubsystemBase {
     m_inclinerMotor.set(0.0);
   }
 
+  // set the incliner's angle to receive the note 
+  public void InclinerSetAngleIntake(){
+    m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleIntake);
+    m_inclinerMotor.set(0);
+  }
+
+  // set the incliner's angle to drop the note into the amplifier
+  public void InclinerSetAngleAmp(){
+    m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleAmp);
+  }
+
+  // set the incliner's angle to drop the note into the speaker
+  public void InclinerSetAngleShooter(){
+    m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleShooter);
+  }
 }

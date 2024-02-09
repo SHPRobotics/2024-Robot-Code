@@ -165,6 +165,9 @@ public final class Constants {
     public static final float kInclinerForwardLimit = 0;
     public static final float kInclinerReverseLimit = 0;
     
+    public static final double kInclinerAngleIntake = -31.2616;
+    public static final double kInclinerAngleAmp = -57.8102;
+    public static final double kInclinerAngleShooter = -14.9047;
   }
   
 }

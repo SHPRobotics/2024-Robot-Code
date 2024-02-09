@@ -14,7 +14,6 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
@@ -44,11 +43,9 @@ public class RobotContainer {
   private final InclinerSubsystem m_incliner = new InclinerSubsystem();
 
   // The driver's controller
-  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-  XboxController m_operatorController = new XboxController(OIConstants.kOperatorControllerPort); //Added xbox controller for separate operator controls
-
-  CommandXboxController m_cDriverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
-  CommandXboxController m_cOperatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
+  
+  CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
+  CommandXboxController m_operatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -83,61 +80,39 @@ public class RobotContainer {
   private void configureButtonBindings() {
 
     // -------------------------------- CHASSIS --------------------------------------------
-    // press X button to stop the robot
-    //new JoystickButton(m_driverController, Button.kX.value)
-    //     .whileTrue(new RunCommand(
-    //         () -> m_robotDrive.setX(),
-    //        m_robotDrive));
-
     
-    // shooter rotator motor is connected to port 7
-    m_cDriverController.x() //added command to xbox controller for operator using command xbox code
+    // press X button of driver joystick to stop the robot and make the wheels form an X to prevent the motion on slope
+    m_driverController.x() //added command to xbox controller for operator using command xbox code
         .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
     
 
     // --------------------------------SHOOTER -----------------------------------------------
-/*
-    // shoot the note out when press Y button
-    new JoystickButton(m_operatorController, Button.kY.value)
-         .whileTrue(new RunCommand(
-             () -> m_shooter.ShooterShootNoteOut(),
-             m_shooter))
-         .whileFalse(new RunCommand(
-             () -> m_shooter.ShooterStop(),
-             m_shooter));
-
-    // feed the note in when press A button
-    new JoystickButton(m_operatorController, Button.kA.value)
-         .whileTrue(new RunCommand(
-             () -> m_shooter.ShooterFeedNoteIn(),
-             m_shooter))
-         .whileFalse(new RunCommand(
-             () -> m_shooter.ShooterStop(),
-             m_shooter));
-*/
-m_cOperatorController
-    .y()
-    .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();
-                                  }))
-    .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();
-                                  }));
+    // hold Y button of operator joystick to shoot the note out. Release the button will stop the shooter motor 
+    m_operatorController.y()
+                        .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();}))
+                        .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
         
-m_cOperatorController
-    .a()
-    .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();
-                                  }))
-    .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();
-                                  }));
+    // hold A button of operator joystick to feed the note in. Release the button will stop the shooter motor 
+    m_operatorController.a()
+                        .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();}))
+                        .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
+
     // --------------------------------INCLINER -----------------------------------------------
     // incliner moves up when leftBumper is hold, stop when release
-    new JoystickButton((m_operatorController), Button.kLeftBumper.value)
-        .whileTrue(new RunCommand(() -> m_incliner.inclinerUp(), m_incliner))
-        .whileFalse(new RunCommand(() -> m_incliner.inclinerStop(), m_incliner));
-        
-    // incliner moves down when rightBumper is hold, stop when release
-    new JoystickButton((m_operatorController), Button.kRightBumper.value)
-        .whileTrue(new RunCommand(() -> m_incliner.inclinerDown(), m_incliner))
-        .whileFalse(new RunCommand(() -> m_incliner.inclinerStop(), m_incliner));
+
+    // hold left bumper of operator joystick to turn the incliner up. Release the button will stop the incliner motor 
+    m_operatorController.leftBumper()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerUp();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+
+    // hold right bumper of operator joystick to turn the incliner down. Release the button will stop the incliner motor 
+    m_operatorController.rightBumper()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+
+    // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
+    m_operatorController.b()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.InclinerSetAngleIntake();}));
 
   }
 
