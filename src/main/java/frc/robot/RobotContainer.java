@@ -22,6 +22,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.InclinerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -65,7 +66,7 @@ public class RobotContainer {
                 -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                true, true),
+                false, true),
             m_robotDrive));
 
   }
@@ -83,34 +84,60 @@ public class RobotContainer {
 
     // -------------------------------- CHASSIS --------------------------------------------
     // press X button to stop the robot
-    new JoystickButton(m_driverController, Button.kX.value)
-         .whileTrue(new RunCommand(
-             () -> m_robotDrive.setX(),
-             m_robotDrive));
+    //new JoystickButton(m_driverController, Button.kX.value)
+    //     .whileTrue(new RunCommand(
+    //         () -> m_robotDrive.setX(),
+    //        m_robotDrive));
 
-    /*
-    // shooter rotastor motor is connected to port 7
+    
+    // shooter rotator motor is connected to port 7
     m_cDriverController.x() //added command to xbox controller for operator using command xbox code
         .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
-    */
+    
 
     // --------------------------------SHOOTER -----------------------------------------------
+/*
     // shoot the note out when press Y button
     new JoystickButton(m_operatorController, Button.kY.value)
          .whileTrue(new RunCommand(
              () -> m_shooter.ShooterShootNoteOut(),
+             m_shooter))
+         .whileFalse(new RunCommand(
+             () -> m_shooter.ShooterStop(),
              m_shooter));
 
     // feed the note in when press A button
     new JoystickButton(m_operatorController, Button.kA.value)
          .whileTrue(new RunCommand(
              () -> m_shooter.ShooterFeedNoteIn(),
+             m_shooter))
+         .whileFalse(new RunCommand(
+             () -> m_shooter.ShooterStop(),
              m_shooter));
-
+*/
+m_cOperatorController
+    .y()
+    .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();
+                                  }))
+    .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();
+                                  }));
+        
+m_cOperatorController
+    .a()
+    .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();
+                                  }))
+    .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();
+                                  }));
     // --------------------------------INCLINER -----------------------------------------------
-    // incliner moves up when leftBumper is pressed
+    // incliner moves up when leftBumper is hold, stop when release
     new JoystickButton((m_operatorController), Button.kLeftBumper.value)
-        .whileTrue(new RunCommand(() -> m_incliner.inclinerUp(), m_incliner));
+        .whileTrue(new RunCommand(() -> m_incliner.inclinerUp(), m_incliner))
+        .whileFalse(new RunCommand(() -> m_incliner.inclinerStop(), m_incliner));
+        
+    // incliner moves down when rightBumper is hold, stop when release
+    new JoystickButton((m_operatorController), Button.kRightBumper.value)
+        .whileTrue(new RunCommand(() -> m_incliner.inclinerDown(), m_incliner))
+        .whileFalse(new RunCommand(() -> m_incliner.inclinerStop(), m_incliner));
 
   }
 

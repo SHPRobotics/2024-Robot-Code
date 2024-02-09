@@ -58,10 +58,11 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Shooter_Right RPM", m_rightEncoder.getVelocity());
 
   }
-
+/*
   public Command ShooterShootNoteOut(){
     return runOnce(
       () ->{
+    System.out.println("ShooterShootNoteOut");
         m_leftMotor.set(ShooterConstants.kShooterSpeed);
         m_rightMotor.set(-ShooterConstants.kShooterSpeed);
       }
@@ -71,21 +72,37 @@ public class ShooterSubsystem extends SubsystemBase {
   public Command ShooterFeedNoteIn(){
     return runOnce(
       () ->{
+    System.out.println("ShooterFeedNoteIn");
         m_leftMotor.set(-ShooterConstants.kShooterSpeed);
         m_rightMotor.set(ShooterConstants.kShooterSpeed);
       }
     );
   }
+*/
 
+  public void ShooterShootNoteOut(){
+    m_leftMotor.set(1); //ShooterConstants.kShooterSpeed);
+    m_rightMotor.set(-1); //ShooterConstants.kShooterSpeed);
+  }
+
+  public void ShooterFeedNoteIn(){
+    m_leftMotor.set(-0.3);  //ShooterConstants.kShooterSpeed);
+    m_rightMotor.set(0.3);  //ShooterConstants.kShooterSpeed);
+  }
+  /*
   public Command ShooterStop() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          /* one-time action goes here */
           m_leftMotor.set(0);
           m_rightMotor.set(0);
         });
-  }
+    }
+  */
 
+    public void ShooterStop() {
+          m_leftMotor.set(0);
+          m_rightMotor.set(0);
+    }
 }

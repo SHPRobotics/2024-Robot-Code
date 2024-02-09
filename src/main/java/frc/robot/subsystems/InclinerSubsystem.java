@@ -28,8 +28,8 @@ public class InclinerSubsystem extends SubsystemBase {
     m_inclinerMotor.setSoftLimit(SoftLimitDirection.kReverse, InclinerConstants.kInclinerReverseLimit);
 
     // enable the softlimits (forward, reverse direction)
-    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kForward, false);
+    m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kReverse,  false);
   }
 
   @Override
@@ -38,13 +38,26 @@ public class InclinerSubsystem extends SubsystemBase {
     // monitor the angle of the incliner
     SmartDashboard.putNumber("Incliner Encoder value", m_inclinerEncoder.getPosition());
   }
-
+/*
   public Command inclinerUp(){
     return runOnce(()->m_inclinerMotor.set(InclinerConstants.kInclinerSpeed));
   }
 
   public Command inclinerDown(){
     return runOnce(()->m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed));
+  }
+*/
+
+  public void inclinerUp(){
+    m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
+  }
+
+  public void inclinerDown(){
+    m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed);
+  }
+
+  public void inclinerStop(){
+    m_inclinerMotor.set(0.0);
   }
 
 }

@@ -131,7 +131,7 @@ public final class Constants {
     public static final int kShooterRightMotorCANId = 9;
 
     public static final IdleMode kShooterMotorIdleMode = IdleMode.kBrake;
-    public static final int kShooterMotorCurrentLimit = 30; // amps
+    public static final int kShooterMotorCurrentLimit = 20; // amps
     
     public static final double kShooterSpeed = 1.0;
   }
