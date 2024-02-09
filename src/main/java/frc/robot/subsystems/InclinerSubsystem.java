@@ -46,7 +46,7 @@ public class InclinerSubsystem extends SubsystemBase {
     return runOnce(()->m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed));
   }
 */
-
+//Let's get started on the incliner angles
   public void inclinerUp(){
     m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
   }
