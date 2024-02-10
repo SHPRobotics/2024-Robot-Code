@@ -89,12 +89,12 @@ public class RobotContainer {
 
     // --------------------------------SHOOTER -----------------------------------------------
     // hold right trigger of operator joystick to shoot the note out. Release the button will stop the shooter motor 
-    m_operatorController.rightTrigger(0.3)
+    m_operatorController.rightTrigger()
                         .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();}))
                         .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
         
     // hold left trigger of operator joystick to feed the note in. Release the button will stop the shooter motor 
-    m_operatorController.leftTrigger(0.3)
+    m_operatorController.leftTrigger()
                         .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
 
