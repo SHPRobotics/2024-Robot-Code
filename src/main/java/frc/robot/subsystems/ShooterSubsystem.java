@@ -43,7 +43,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // operation, it will maintain the above configurations.
     m_leftMotor.burnFlash();
     m_rightMotor.burnFlash();
-//yikgu
+
     // encoders
     m_leftEncoder = m_leftMotor.getEncoder();
     m_rightEncoder = m_leftMotor.getEncoder();

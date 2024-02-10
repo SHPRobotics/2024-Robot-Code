@@ -168,6 +168,7 @@ public final class Constants {
     public static final double kInclinerAngleIntake = -31.2616;
     public static final double kInclinerAngleAmp = -57.8102;
     public static final double kInclinerAngleShooter = -14.9047;
+    //best fit equation for (angle, encoderValue) relationship: V = 
   }
   
 }

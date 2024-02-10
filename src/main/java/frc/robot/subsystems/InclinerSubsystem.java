@@ -70,7 +70,7 @@ public class InclinerSubsystem extends SubsystemBase {
     m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleAmp);
   }
 
-  // set the incliner's angle to drop the note into the speaker
+  // set the incliner's angle to shoot the note into the speaker
   public void InclinerSetAngleShooter(){
     m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleShooter);
   }

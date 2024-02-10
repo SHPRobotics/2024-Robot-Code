@@ -81,19 +81,20 @@ public class RobotContainer {
 
     // -------------------------------- CHASSIS --------------------------------------------
     
-    // press X button of driver joystick to stop the robot and make the wheels form an X to prevent the motion on slope
-    m_driverController.x() //added command to xbox controller for operator using command xbox code
+    // press right bumper button of driver joystick to stop the robot and make the wheels form an X to prevent the motion on slope
+    m_driverController.rightBumper() //added command to xbox controller for operator using command xbox code
         .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
-    
+        //Instead of ".whileTrue" so the operator must hold the button, could we use one command 
+        //that locks the wheels .onTrue and another command that unloacks the wheels .onTrue?
 
     // --------------------------------SHOOTER -----------------------------------------------
-    // hold Y button of operator joystick to shoot the note out. Release the button will stop the shooter motor 
-    m_operatorController.y()
+    // hold right trigger of operator joystick to shoot the note out. Release the button will stop the shooter motor 
+    m_operatorController.rightTrigger(0.3)
                         .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();}))
                         .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
         
-    // hold A button of operator joystick to feed the note in. Release the button will stop the shooter motor 
-    m_operatorController.a()
+    // hold left trigger of operator joystick to feed the note in. Release the button will stop the shooter motor 
+    m_operatorController.leftTrigger(0.3)
                         .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
 
