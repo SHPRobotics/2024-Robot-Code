@@ -57,6 +57,9 @@ public class RobotContainer {
     // Configure default commands
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
+            //To change translation from joystick to D-pad, refer to GenericHID API for getPov() method
+            //Test following code, rpelacing both lines 66 & 67: 
+            //-MathUtil.applyDeadband(m_driverController.getPov(), OIConstants.kDriveDeadband)
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
