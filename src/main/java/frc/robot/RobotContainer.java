@@ -85,7 +85,7 @@ public class RobotContainer {
     // -------------------------------- CHASSIS --------------------------------------------
     
     // press right bumper button of driver joystick to stop the robot and make the wheels form an X to prevent the motion on slope
-    m_driverController.rightBumper() //added command to xbox controller for operator using command xbox code
+    m_driverController.rightTrigger() //added command to xbox controller for operator using command xbox code
         .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
         //Instead of ".whileTrue" so the operator must hold the button, could we use one command 
         //that locks the wheels .onTrue and another command that unloacks the wheels .onTrue?
