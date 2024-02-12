@@ -22,13 +22,16 @@ public class InclinerSubsystem extends SubsystemBase {
   
   /** Creates a new InclinerSubsystem. */
   public InclinerSubsystem() {
+    m_inclinerEncoder.setPosition(0);
+
     // set the angle limit the incliner can move (forward, reveese direction)
-    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kForward, InclinerConstants.kInclinerForwardLimit);
-    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kReverse, InclinerConstants.kInclinerReverseLimit);
+    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kForward, (float) InclinerConstants.kInclinerForwardLimit);
+    m_inclinerMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) InclinerConstants.kInclinerAngleIntake);  //kInclinerReverseLimit);
 
     // enable the softlimits (forward, reverse direction)
     m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kForward, false);
     m_inclinerMotor.enableSoftLimit(SoftLimitDirection.kReverse,  false);
+    
   }
 
   @Override
@@ -55,14 +58,27 @@ public class InclinerSubsystem extends SubsystemBase {
     m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed);
   }
 
+  public void setInclinerIntakeAngle(){
+    if (m_inclinerEncoder.getPosition()< InclinerConstants.kInclinerAngleIntake) 
+      m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
+
+    else if (m_inclinerEncoder.getPosition()> InclinerConstants.kInclinerAngleIntake)
+      m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed);
+
+    else
+      m_inclinerMotor.set(0);
+    
+  }
+  
   public void inclinerStop(){
     m_inclinerMotor.set(0.0);
   }
 
   // set the incliner's angle to receive the note 
   public void InclinerSetAngleIntake(){
-    m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleIntake);
-    m_inclinerMotor.set(0);
+    //System.out.println("InclinerSetAngleIntake");
+    //m_inclinerEncoder.setPosition(InclinerConstants.kInclinerAngleIntake);
+    //m_inclinerMotor.set(0);
   }
 
   // set the incliner's angle to drop the note into the amplifier

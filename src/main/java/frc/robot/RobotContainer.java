@@ -87,6 +87,16 @@ public class RobotContainer {
     // press right bumper button of driver joystick to stop the robot and make the wheels form an X to prevent the motion on slope
     m_driverController.rightTrigger() //added command to xbox controller for operator using command xbox code
         .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
+
+    // press left bumper for strafe true left
+    m_driverController.leftBumper()
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, .5, 0, true, true), m_robotDrive));
+
+    // press right bumper for strafe true right
+    m_driverController.rightBumper()
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, -
+        
+        .5, 0, true, true), m_robotDrive));
         //Instead of ".whileTrue" so the operator must hold the button, could we use one command 
         //that locks the wheels .onTrue and another command that unloacks the wheels .onTrue?
 
@@ -116,7 +126,15 @@ public class RobotContainer {
 
     // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
     m_operatorController.b()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.InclinerSetAngleIntake();}));
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.setInclinerIntakeAngle();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+                        ;
+
+    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
+    m_operatorController.a()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+                        ;
 
   }
 
