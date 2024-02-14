@@ -63,10 +63,10 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getRightY(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                false, true),
+                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                false, true), 
             m_robotDrive));
 
   }
@@ -90,13 +90,11 @@ public class RobotContainer {
 
     // press left bumper for strafe true left
     m_driverController.leftBumper()
-        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, .5, 0, true, true), m_robotDrive));
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, 0.5, 0, false, true), m_robotDrive));
 
     // press right bumper for strafe true right
     m_driverController.rightBumper()
-        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, -
-        
-        .5, 0, true, true), m_robotDrive));
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, -0.5, 0, false, true), m_robotDrive));
         //Instead of ".whileTrue" so the operator must hold the button, could we use one command 
         //that locks the wheels .onTrue and another command that unloacks the wheels .onTrue?
 
@@ -126,7 +124,7 @@ public class RobotContainer {
 
     // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
     m_operatorController.b()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.setInclinerIntakeAngle();}))
+                        .onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
                         .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
                         ;
 

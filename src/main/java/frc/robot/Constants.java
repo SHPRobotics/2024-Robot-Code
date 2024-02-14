@@ -24,8 +24,28 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+/*
+ * MOTOR                    CANID
+ * ------------------------ ------
+ * FL Driving motor         11
+ * FL Turning motor         10
+ * FR Driving motor         15
+ * FR Turning motor         14
+ * RL Driving motor         13
+ * RL Turning motor         12
+ * RR Driving motor         17
+ * RR Turning motor         16
+ * 
+ * Shooter L motor          8
+ * Shooter R motor          9
+ * 
+ * Arm (incliner) motor     7
+ * 
+ * Intake motor             6
+ * 
+ */
 
-  // DriveConstants
+  // DriveConstants ===================================================================================
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
@@ -67,7 +87,7 @@ public final class Constants {
     public static final boolean kGyroReversed = false;
   }
 
-  // ModuleConstants
+  // ModuleConstants ===============================================================================
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T, 13T, or 14T.
     // This changes the drive speed of the module (a pinion gear with more teeth will result in a
@@ -116,7 +136,7 @@ public final class Constants {
     public static final int kTurningMotorCurrentLimit = 20; // amps
   }
 
-  // OIConstants
+  // OIConstants =================================================================================
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
@@ -124,20 +144,20 @@ public final class Constants {
     public static final int kDriveControllerPort = 0;
   }
 
-  // ShooterConstants
+  // ShooterConstants ===========================================================================
   public static final class ShooterConstants {
 
     public static final int kShooterLeftMotorCANId = 8;
     public static final int kShooterRightMotorCANId = 9;
 
     public static final IdleMode kShooterMotorIdleMode = IdleMode.kBrake;
-    public static final int kShooterMotorCurrentLimit = 30; // amps
+    public static final int kShooterMotorCurrentLimit = 40; // amps
     
     public static final double kShooterSpeed = 1.0;
   }
   
 
-  // AutoConstants
+  // AutoConstants ==============================================================================
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
@@ -153,12 +173,12 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
-  // NeoMotorConstants
+  // NeoMotorConstants =========================================================================
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
 
-  // InclinerConstants
+  // InclinerConstants ========================================================================
   public static final class InclinerConstants {
     public static final int kInclinerMotorCANId = 7;
 	  public static final double kInclinerSpeed = 0.2;
