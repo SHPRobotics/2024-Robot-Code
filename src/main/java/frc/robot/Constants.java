@@ -194,6 +194,9 @@ public final class Constants {
   public static final class GroundIntakeConstants{
     public static final int kRightGroundIntakeCANId = 6;
     public static final int kLeftGroundIntakeCANId = 5;
+    public static final double kGroundIntakeSpeed = 0.2;
+
+
     // add constants 
   }
   

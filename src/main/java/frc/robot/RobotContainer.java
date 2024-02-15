@@ -134,6 +134,9 @@ public class RobotContainer {
                         .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
                         
     */
+   // -------------------------------- GROUND INTAKE --------------------------------------------
+   m_operatorController.rightTrigger() //added command to xbox controller for operator using command xbox code
+    .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
   }
 
   /**
