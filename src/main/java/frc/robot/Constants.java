@@ -190,5 +190,11 @@ public final class Constants {
     public static final double kInclinerAngleShooter = -14.9047;
     //best fit equation for (angle, encoderValue) relationship: V = 
   }
+    // GroundIntakeConstants ========================================================================
+  public static final class GroundIntakeConstants{
+    public static final int kRightGroundIntakeCANId = 6;
+    public static final int kLeftGroundIntakeCANId = 5;
+    // add constants 
+  }
   
 }
