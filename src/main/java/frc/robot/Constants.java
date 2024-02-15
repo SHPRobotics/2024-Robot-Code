@@ -191,10 +191,13 @@ public final class Constants {
     //best fit equation for (angle, encoderValue) relationship: V = 
   }
     // GroundIntakeConstants ========================================================================
-  public static final class GroundIntakeConstants{
-    public static final int kRightGroundIntakeCANId = 6;
-    public static final int kLeftGroundIntakeCANId = 5;
+  public static final class GroundIntakeConstants {
+    public static final int kRightGroundIntakeMotorCANId = 6;
+    public static final int kLeftGroundIntakeMotorCANId = 5;
     public static final double kGroundIntakeSpeed = 0.2;
+    public static final IdleMode kGroundIntakeMotorIdleMode = IdleMode.kBrake;
+    public static final int kGroundIntakeMotorCurrentLimit =40; //amps
+
 
 
     // add constants 

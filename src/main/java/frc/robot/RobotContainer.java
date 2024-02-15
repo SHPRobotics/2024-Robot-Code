@@ -20,6 +20,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.InclinerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.GroundIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import java.util.List;
+import frc.robot.Constants.GroundIntakeConstants;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -41,7 +43,8 @@ public class RobotContainer {
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   // Incliner subsystem
   private final InclinerSubsystem m_incliner = new InclinerSubsystem();
-
+  // Ground Intake Subsystem
+  private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
   
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
@@ -50,6 +53,7 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
@@ -80,7 +84,7 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
-  private void configureButtonBindings() {
+   private void configureButtonBindings() {
 
     // -------------------------------- CHASSIS --------------------------------------------
     
@@ -135,8 +139,10 @@ public class RobotContainer {
                         
     */
    // -------------------------------- GROUND INTAKE --------------------------------------------
-   m_operatorController.rightTrigger() //added command to xbox controller for operator using command xbox code
-    .whileTrue(new RunCommand(()-> m_robotDrive.setX(), m_robotDrive));
+
+    m_operatorController.povUp()
+                        .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
+                        .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
   }
 
   /**
@@ -144,7 +150,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+
+  public Command getAutonomousCommand(){
+
     // Create config for trajectory
     TrajectoryConfig config = new TrajectoryConfig(
         AutoConstants.kMaxSpeedMetersPerSecond,
@@ -183,5 +191,8 @@ public class RobotContainer {
 
     // Run path following command, then stop at the end.
     return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
+    
   }
+  
+    
 }
