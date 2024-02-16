@@ -171,6 +171,10 @@ public final class Constants {
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+    
+    public static final double kAutoDriveSpeed = 0.5;  // speed of robot in Autonomous mode
+    public static final boolean kAutoDriveReversed = false;
+    public static final double kAutoDriveDistanceMeters = 0;
   }
 
   // NeoMotorConstants =========================================================================

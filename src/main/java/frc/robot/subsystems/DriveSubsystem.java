@@ -68,6 +68,13 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearRight.getPosition()
       });
 
+  // distance the robot traveled
+  private double m_distanceTraveled = 0;
+  private double m_previousX  =  0; 
+  private double m_previousY = 0;
+  private double m_currentX  =  0; 
+  private double m_currentY = 0;
+
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
     new Thread(()->{
@@ -94,6 +101,20 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+
+    // get the current position (x,y) of robot with respect to the field
+    m_currentX = getPose().getX();
+    m_currentY = getPose().getY();
+
+    //                                   __________________________________________________
+    // The total distance is the sum of √ (currentX - previousX)² + (currentY - previousY)²
+    m_distanceTraveled += Math.sqrt(Math.pow((m_currentX - m_previousX), 2) +
+                                    Math.pow((m_currentY - m_previousY), 2));
+
+    // now the previous X,Y are the current X,Y and the loop cont
+    m_previousX = m_currentX;
+    m_previousY = m_currentY;
+
   }
 
   /**
@@ -206,7 +227,6 @@ public class DriveSubsystem extends SubsystemBase {
    * Sets the wheels into an X formation to prevent movement.
    */
   public void setX() {
-    System.out.println("setX");
     m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), "FL");
     m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), "FR");
     m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), "RL");
@@ -234,11 +254,17 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearLeft.resetEncoders();
     m_frontRight.resetEncoders();
     m_rearRight.resetEncoders();
+
+    m_distanceTraveled = 0.0;
   }
 
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
     m_gyro.reset();
+  }
+
+  public double getAverageEncoderDistance() {
+    return m_distanceTraveled;
   }
 
   /**

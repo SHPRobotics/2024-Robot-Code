@@ -1,22 +1,28 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-
+/*
+ * DATE CHANGE  CHANGE BY   REASON
+ * -----------  ---------   ------------------------------------------------------------------------------------------
+ * 02/16/2024   TRINH2      -Add 2 Auton. commands in Autos.java 
+ *                              1. driveDistanceAuto(driveSubsystem, driveReversed, distanceMeters): drive half speed Forward (if driveReversed=false)
+ *                                  or Reverse (if driveReversed=true) for a distance distanceMeters in meter
+ *                              2. driveAlongPathAuto(driveSubsystem) to drive the robot along a predefined path
+ *                          -Add Command method getAverageEncoderDistance() in DriveSubsystem.java to get the distance the robot ran since the last encoder reset
+ *                              and Command method driveAlongPathAuto() to drive robot along a predefined path
+ *                          -Add a drop-down list box (chooser) in RobotContainer.java to allow the user to choose which auton. command to run
+ *                              This chooser appears in Shuffleboard under 'Autonomous' tab
+ * -------------------------------------------------------------------------------------------------------------------
+ */
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.InclinerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -24,11 +30,8 @@ import frc.robot.subsystems.GroundIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import java.util.List;
-import frc.robot.Constants.GroundIntakeConstants;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -46,6 +49,15 @@ public class RobotContainer {
   // Ground Intake Subsystem
   private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
+
+  // command to drive the robot in reverse for 1.5 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
+  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, AutoConstants.kAutoDriveReversed, AutoConstants.kAutoDriveDistanceMeters);
+
+  // command to drive the robot along a predefined path
+  private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
+
+  // a chooser (similar to a dropdown list) for user to select which autonomous command to run
+  SendableChooser<Command> m_chooser = new SendableChooser<>();
   
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
   CommandXboxController m_operatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
@@ -72,6 +84,14 @@ public class RobotContainer {
                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
                 false, true), 
             m_robotDrive));
+
+    // add driveDistanceAuto commands to the command chooser as the default command
+    m_chooser.setDefaultOption("Drive a Distance", m_driveDistanceAuto);
+    // add 2nd auton command
+    m_chooser.addOption("Drive Along a Path", m_driveAlongPathAuto);
+
+    // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
+    Shuffleboard.getTab("Autonomous").add(m_chooser);
 
   }
 
@@ -143,6 +163,10 @@ public class RobotContainer {
     m_operatorController.povUp()
                         .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
+
+    m_operatorController.povDown()
+                        .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteOut();}))
+                        .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
   }
 
   /**
@@ -152,46 +176,7 @@ public class RobotContainer {
    */
 
   public Command getAutonomousCommand(){
-
-    // Create config for trajectory
-    TrajectoryConfig config = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-        // Add kinematics to ensure max speed is actually obeyed
-        .setKinematics(DriveConstants.kDriveKinematics);
-
-    // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(3, 0, new Rotation2d(0)),
-        config);
-
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-        exampleTrajectory,
-        m_robotDrive::getPose, // Functional interface to feed supplier
-        DriveConstants.kDriveKinematics,
-
-        // Position controllers
-        new PIDController(AutoConstants.kPXController, 0, 0),
-        new PIDController(AutoConstants.kPYController, 0, 0),
-        thetaController,
-        m_robotDrive::setModuleStates,
-        m_robotDrive);
-
-    // Reset odometry to the starting pose of the trajectory.
-    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
-
-    // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
-    
+    return m_chooser.getSelected();    
   }
   
     

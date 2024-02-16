@@ -54,6 +54,11 @@ public class GroundIntakeSubsystem extends SubsystemBase {
         m_rightGroundMotor.set(1); //GroundIntakeConstants.kGroundIntakeSpeed);
     }
 
+    public void GroundIntakeFeedNoteOut(){
+        m_leftGroundMotor.set(-1); //GroundIntakeConstants.kGroundIntakeSpeed);
+        m_rightGroundMotor.set(-1); //GroundIntakeConstants.kGroundIntakeSpeed);
+    }
+
 //Tells ground intake motors to stop
     public void GroundIntakeStop() {
         m_leftGroundMotor.set(0);
