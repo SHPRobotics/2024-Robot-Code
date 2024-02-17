@@ -59,6 +59,7 @@ public class InclinerSubsystem extends SubsystemBase {
   }
 
   public void setInclinerIntakeAngle(){
+    System.out.println("setInclinerIntakeAngle");
     if (m_inclinerEncoder.getPosition()< InclinerConstants.kInclinerAngleIntake) 
       m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
 
@@ -67,7 +68,7 @@ public class InclinerSubsystem extends SubsystemBase {
 
     else
       m_inclinerMotor.set(0);
-    
+    System.out.println("Encoder reading:"+m_inclinerEncoder.getPosition());
   }
   
   public void inclinerStop(){
