@@ -59,18 +59,20 @@ public class InclinerSubsystem extends SubsystemBase {
   }
 
   public void setInclinerIntakeAngle(){
-    if (m_inclinerEncoder.getPosition()< InclinerConstants.kInclinerAngleIntake) 
-      m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
-
-    else if (m_inclinerEncoder.getPosition()> InclinerConstants.kInclinerAngleIntake)
-      m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed);
-
+    System.out.println("arm position: "+m_inclinerEncoder.getPosition());
+    if (m_inclinerEncoder.getPosition()< InclinerConstants.kInclinerAngleIntake-1) 
+      //m_inclinerMotor.set(InclinerConstants.kInclinerSpeed);
+      inclinerDown();
+    else if (m_inclinerEncoder.getPosition()> InclinerConstants.kInclinerAngleIntake+1)
+      //m_inclinerMotor.set(-InclinerConstants.kInclinerSpeed);
+      inclinerUp();
     else
       m_inclinerMotor.set(0);
     
   }
   
   public void inclinerStop(){
+    System.out.println("inclinerStop");
     m_inclinerMotor.set(0.0);
   }
 

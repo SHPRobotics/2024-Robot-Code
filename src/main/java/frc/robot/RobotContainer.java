@@ -79,9 +79,9 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getRightY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
                 false, true), 
             m_robotDrive));
 
@@ -148,16 +148,19 @@ public class RobotContainer {
 
     // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
     m_operatorController.b()
+                        //.onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
                         .onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+                        ;
                         
 
     // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
-    /*m_operatorController.a()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
+    /*
+    m_operatorController.a()
+                        .onTrue(Commands. .runOnce(() ->{ m_incliner.inclinerDown();}))
                         .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
-                        
-    */
+    */   
+    
    // -------------------------------- GROUND INTAKE --------------------------------------------
 
     m_operatorController.povUp()
