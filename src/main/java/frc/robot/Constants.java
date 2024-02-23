@@ -39,11 +39,19 @@ public final class Constants {
  * Shooter L motor          8
  * Shooter R motor          9
  * 
- * Arm (incliner) motor     7
+ * Arm (Arm) motor     7
  * 
  * Intake motor             6
  * 
  */
+
+  // OIConstants =================================================================================
+  public static final class OIConstants {
+    public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
+    public static final double kDriveDeadband = 0.05;
+    public static final int kDriveControllerPort = 0;
+  }
 
   // DriveConstants ===================================================================================
   public static final class DriveConstants {
@@ -136,14 +144,6 @@ public final class Constants {
     public static final int kTurningMotorCurrentLimit = 20; // amps
   }
 
-  // OIConstants =================================================================================
-  public static final class OIConstants {
-    public static final int kDriverControllerPort = 0;
-    public static final int kOperatorControllerPort = 1;
-    public static final double kDriveDeadband = 0.05;
-    public static final int kDriveControllerPort = 0;
-  }
-
   // ShooterConstants ===========================================================================
   public static final class ShooterConstants {
 
@@ -155,7 +155,32 @@ public final class Constants {
     
     public static final double kShooterSpeed = 1.0;
   }
+
+  // ArmConstants ========================================================================
+  public static final class ArmConstants {
+    public static final int kArmMotorCANId = 7;
+	  public static final double kArmSpeed = 0.2;
+    public static final float kArmForwardLimit = 0;
+    public static final float kArmReverseLimit = 0;
+    
+    public static final double kArmAngleNeutral = 0;        // -61°, 0° is horizontal
+    public static final double kArmAngleSource = -25.40;    // 21°, 0° is horizontal
+    public static final double kArmAngleAmp = -55.2861;       // -35°
+    public static final double kArmAngleSpeaker = -7.1428;    // 57°
+    //best fit equation for (angle, encoderValue) relationship: V = 
+
+    public static final int kArmMotorCurrentLimit = 40;     // amps
+    
+  }
   
+  // GroundIntakeConstants ========================================================================
+  public static final class GroundIntakeConstants {
+    public static final int kRightGroundIntakeMotorCANId = 6;
+    public static final int kLeftGroundIntakeMotorCANId = 5;
+    public static final double kGroundIntakeSpeed = 0.2;
+    public static final IdleMode kGroundIntakeMotorIdleMode = IdleMode.kBrake;
+    public static final int kGroundIntakeMotorCurrentLimit =40; //amps
+  }
 
   // AutoConstants ==============================================================================
   public static final class AutoConstants {
@@ -180,31 +205,6 @@ public final class Constants {
   // NeoMotorConstants =========================================================================
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
-  }
-
-  // InclinerConstants ========================================================================
-  public static final class InclinerConstants {
-    public static final int kInclinerMotorCANId = 7;
-	  public static final double kInclinerSpeed = 0.2;
-    public static final float kInclinerForwardLimit = 0;
-    public static final float kInclinerReverseLimit = 0;
-    
-    public static final double kInclinerAngleIntake = -35.0;  // -31.2616;
-    public static final double kInclinerAngleAmp = -57.8102;
-    public static final double kInclinerAngleShooter = -14.9047;
-    //best fit equation for (angle, encoderValue) relationship: V = 
-  }
-    // GroundIntakeConstants ========================================================================
-  public static final class GroundIntakeConstants {
-    public static final int kRightGroundIntakeMotorCANId = 6;
-    public static final int kLeftGroundIntakeMotorCANId = 5;
-    public static final double kGroundIntakeSpeed = 0.2;
-    public static final IdleMode kGroundIntakeMotorIdleMode = IdleMode.kBrake;
-    public static final int kGroundIntakeMotorCurrentLimit =40; //amps
-
-
-
-    // add constants 
   }
   
 }

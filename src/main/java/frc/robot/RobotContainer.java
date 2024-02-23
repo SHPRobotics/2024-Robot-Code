@@ -12,7 +12,25 @@
  *                              and Command method driveAlongPathAuto() to drive robot along a predefined path
  *                          -Add a drop-down list box (chooser) in RobotContainer.java to allow the user to choose which auton. command to run
  *                              This chooser appears in Shuffleboard under 'Autonomous' tab
+ * 02/22/2024   TRINH2      -Change all occurences of 'Incliner' to 'Arm'. I think 'Arm' sounds better than 'Incliner'
+ *                          -Per Tony's request, left stick drives forward/backward, right stick to turn (as before)
  * -------------------------------------------------------------------------------------------------------------------
+ * ACTION         BUTTON          XBOXCONTROLLER    TO DO THIS
+ * ------------   -------------   --------------    ---------------------------------------
+ * Press & Hold   Right Trigger   Driver            Stop robot and lock wheel to form an 'X'
+ * Press & Hold   Left Bumper     Driver            Strafe left
+ * Press & Hold   Right Bumper    Driver            Strafe right 
+ * 
+ * Press once     Right Trigger   Operator          Shoot the note out
+ * Press once     Left Trigger    Operator          Feed the note in
+ * Press once     Left Bumper     Operator          Move Arm up
+ * Press once     Right Bumper    Operator          Move Arm down
+ * Press once     X               Operator          Move arm to Source position
+ * Press once     Y               Operator          Move arm to Amp position
+ * Press once     B               Operator          Move arm to Speaker position
+ * Press once     A               Operator          Move arm to its neutral position
+ * Press once     DPad Up         Operator          Ground intake takes note in
+ * Press once     DPad Down       Operator          Ground intake pushes note out
  */
 package frc.robot;
 
@@ -20,11 +38,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ArmSetAngle;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.InclinerSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,8 +64,8 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   // Shooter subsystem
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  // Incliner subsystem
-  private final InclinerSubsystem m_incliner = new InclinerSubsystem();
+  // Arm subsystem
+  private final ArmSubsystem m_arm = new ArmSubsystem();
   // Ground Intake Subsystem
   private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
@@ -73,9 +93,6 @@ public class RobotContainer {
     // Configure default commands
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
-            //To change translation from joystick to D-pad, refer to GenericHID API for getPov() method
-            //Test following code, rpelacing both lines 66 & 67: 
-            //-MathUtil.applyDeadband(m_driverController.getPov(), OIConstants.kDriveDeadband)
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
@@ -125,48 +142,62 @@ public class RobotContainer {
     // --------------------------------SHOOTER -----------------------------------------------
     // hold right trigger of operator joystick to shoot the note out. Release the button will stop the shooter motor 
     m_operatorController.rightTrigger()
-                        .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterShootNoteOut();}))
-                        .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
+                        .onTrue(Commands.runOnce(() ->{ m_shooter.shooterShootNoteOut();}))
+                        .onFalse(Commands.runOnce(() ->{ m_shooter.shooterStop();}));
         
     // hold left trigger of operator joystick to feed the note in. Release the button will stop the shooter motor 
     m_operatorController.leftTrigger()
-                        .onTrue(Commands.runOnce(() ->{ m_shooter.ShooterFeedNoteIn();}))
-                        .onFalse(Commands.runOnce(() ->{ m_shooter.ShooterStop();}));
+                        .onTrue(Commands.runOnce(() ->{ m_shooter.shooterFeedNoteIn();}))
+                        .onFalse(Commands.runOnce(() ->{ m_shooter.shooterStop();}));
 
-    // --------------------------------INCLINER -----------------------------------------------
-    // incliner moves up when leftBumper is hold, stop when release
+    // --------------------------------Arm -----------------------------------------------
+    // Arm moves up when leftBumper is hold, stop when release
 
-    // hold left bumper of operator joystick to turn the incliner up. Release the button will stop the incliner motor 
+    // hold left bumper of operator joystick to turn the Arm up. Release the button will stop the Arm motor 
     m_operatorController.leftBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerUp();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        .onTrue(Commands.runOnce(() ->{ m_arm.armUp();}))
+                        .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
 
-    // hold right bumper of operator joystick to turn the incliner down. Release the button will stop the incliner motor 
+    // hold right bumper of operator joystick to turn the Arm down. Release the button will stop the Arm motor 
     m_operatorController.rightBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        .onTrue(Commands.runOnce(() ->{ m_arm.armDown();}))
+                        .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
 
-    // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
-    m_operatorController.b()
-                        //.onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
-                        .onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+    // press button X of operator joystick to set the arm to source angle
+    m_operatorController.x()
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSource))
+                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
                         ;
-                        
-
-    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
-    /*
+    // same as above but use inline function
     m_operatorController.a()
-                        .onTrue(Commands. .runOnce(() ->{ m_incliner.inclinerDown();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
-    */   
-    
-   // -------------------------------- GROUND INTAKE --------------------------------------------
+                        .onTrue(new RunCommand(()-> m_arm.setArmIntakeAngle(ArmConstants.kArmAngleSource), m_arm)
+                                              .until(()-> m_arm.isArmUp() && m_arm.isArmDown()))
+                        ;
+/*
+    // press button A of operator joystick to set the arm to its neutral position
+    m_operatorController.a()
+                        .onTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
+                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
+                        ;
+*/
+    // press button Y of operator joystick to set the arm to the Amp position
+    m_operatorController.y()
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))
+                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
+                        ;
 
+    // press button B of operator joystick to set the arm to the Speaker position
+    m_operatorController.b()
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
+                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
+                        ;
+                       
+    // -------------------------------- GROUND INTAKE --------------------------------------------
+    // press DPad Up to take the note in
     m_operatorController.povUp()
                         .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
-
+    // press DPad Down to push the note out
     m_operatorController.povDown()
                         .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteOut();}))
                         .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));

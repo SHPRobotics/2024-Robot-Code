@@ -79,12 +79,12 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 */
 
-  public void ShooterShootNoteOut(){
+  public void shooterShootNoteOut(){
     m_leftMotor.set(1); //ShooterConstants.kShooterSpeed);
     m_rightMotor.set(-1); //ShooterConstants.kShooterSpeed);
   }
 
-  public void ShooterFeedNoteIn(){
+  public void shooterFeedNoteIn(){
     m_leftMotor.set(-0.3);  //ShooterConstants.kShooterSpeed);
     m_rightMotor.set(0.3);  //ShooterConstants.kShooterSpeed);
   }
@@ -100,7 +100,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
   */
 
-    public void ShooterStop() {
+    public void shooterStop() {
           m_leftMotor.set(0);
           m_rightMotor.set(0);
     }
