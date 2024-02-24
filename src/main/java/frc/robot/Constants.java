@@ -172,6 +172,19 @@ public final class Constants {
     public static final int kArmMotorCurrentLimit = 40;     // amps
     
   }
+
+  // InclinerConstants ========================================================================
+  public static final class InclinerConstants {
+    public static final int kInclinerMotorCANId = 7;
+	  public static final double kInclinerSpeed = 0.2;
+    public static final float kInclinerForwardLimit = 0;
+    public static final float kInclinerReverseLimit = 0;
+    
+    public static final double kInclinerAngleIntake = -35.0;  // -31.2616;
+    public static final double kInclinerAngleAmp = -57.8102;
+    public static final double kInclinerAngleShooter = -14.9047;
+    //best fit equation for (angle, encoderValue) relationship: V = 
+  }
   
   // GroundIntakeConstants ========================================================================
   public static final class GroundIntakeConstants {

@@ -168,18 +168,14 @@ public class RobotContainer {
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSource))
                         //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
                         ;
-    // same as above but use inline function
-    m_operatorController.a()
-                        .onTrue(new RunCommand(()-> m_arm.setArmIntakeAngle(ArmConstants.kArmAngleSource), m_arm)
-                                              .until(()-> m_arm.isArmUp() && m_arm.isArmDown()))
-                        ;
-/*
+   
+////
     // press button A of operator joystick to set the arm to its neutral position
     m_operatorController.a()
                         .onTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
                         //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
                         ;
-*/
+////
     // press button Y of operator joystick to set the arm to the Amp position
     m_operatorController.y()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))
@@ -188,8 +184,10 @@ public class RobotContainer {
 
     // press button B of operator joystick to set the arm to the Speaker position
     m_operatorController.b()
-                        .onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
+                        ;                    
+    /* .onTrue(new RunCommand(()->{ m_arm.setArmIntakeAngle();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));*/
                         
 
     // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
