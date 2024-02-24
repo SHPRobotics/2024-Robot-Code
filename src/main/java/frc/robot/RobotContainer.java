@@ -188,12 +188,18 @@ public class RobotContainer {
 
     // press button B of operator joystick to set the arm to the Speaker position
     m_operatorController.b()
-                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
-                        ;
-                       
-    // -------------------------------- GROUND INTAKE --------------------------------------------
-    // press DPad Up to take the note in
+                        .onTrue(new RunCommand(()->{ m_incliner.setInclinerIntakeAngle();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        
+
+    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
+    /*m_operatorController.a()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
+                        
+    */
+   // -------------------------------- GROUND INTAKE --------------------------------------------
+
     m_operatorController.povUp()
                         .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
