@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 
 // Arm subsystem is used to change the angle of the shooter
@@ -59,21 +60,19 @@ public class ArmSubsystem extends SubsystemBase {
     if (m_ArmEncoder.getPosition() < angle){
       armUp();
       m_armUp = true;
-      System.out.print("Arm Up ");
+      if (Constants.DEBUG) System.out.print("Arm Up ");
     }
     else if (m_ArmEncoder.getPosition() > angle){
       armDown();
       m_armDown = true;
-      System.out.print("Arm Down ");
+      if (Constants.DEBUG) System.out.print("Arm Down ");
     }
     else{
       armStop();
       m_armDown = true;
       m_armUp = true;
-      System.out.print("Arm at target ");
+      if (Constants.DEBUG) System.out.print("Arm at target ");
     }
-
-    System.out.println("at position: " + m_ArmEncoder.getPosition() + ", target angle = "+ angle);
 
   }
   
@@ -86,7 +85,6 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   public void armStop(){
-    System.out.println("ArmStop");
     m_ArmMotor.set(0.0);
   }
 

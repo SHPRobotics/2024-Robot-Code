@@ -44,7 +44,7 @@ public final class Constants {
  * Intake motor             6
  * 
  */
-
+  public static final boolean DEBUG = true;
   // OIConstants =================================================================================
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
@@ -168,6 +168,8 @@ public final class Constants {
     public static final double kArmAngleAmp = -55.2861;       // -35°
     public static final double kArmAngleSpeaker = -7.1428;    // 57°
     //best fit equation for (angle, encoderValue) relationship: V = 
+    
+    public static final double kInclinerAngleGroundIntake =  0;
 
     public static final int kArmMotorCurrentLimit = 40;     // amps
     
@@ -190,7 +192,9 @@ public final class Constants {
   public static final class GroundIntakeConstants {
     public static final int kRightGroundIntakeMotorCANId = 6;
     public static final int kLeftGroundIntakeMotorCANId = 5;
-    public static final double kGroundIntakeSpeed = 0.2;
+    public static final int kTopGroundIntakeMotorCANId = 4;
+    public static final double kGroundIntakeSpeed = 1;
+    public static final double kTopGroundIntakeSpeed = -1;
     public static final IdleMode kGroundIntakeMotorIdleMode = IdleMode.kBrake;
     public static final int kGroundIntakeMotorCurrentLimit =40; //amps
   }

@@ -21,20 +21,21 @@
  * Press & Hold   Left Bumper     Driver            Strafe left
  * Press & Hold   Right Bumper    Driver            Strafe right 
  * 
- * Press once     Right Trigger   Operator          Shoot the note out
- * Press once     Left Trigger    Operator          Feed the note in
- * Press once     Left Bumper     Operator          Move Arm up
- * Press once     Right Bumper    Operator          Move Arm down
- * Press once     X               Operator          Move arm to Source position
- * Press once     Y               Operator          Move arm to Amp position
- * Press once     B               Operator          Move arm to Speaker position
- * Press once     A               Operator          Move arm to its neutral position
- * Press once     DPad Up         Operator          Ground intake takes note in
- * Press once     DPad Down       Operator          Ground intake pushes note out
+ * Press & Hold     Right Trigger   Operator          Shoot the note out
+ * Press & Hold     Left Trigger    Operator          Feed the note in
+ * Press & Hold     Left Bumper     Operator          Move Arm up
+ * Press & Hold     Right Bumper    Operator          Move Arm down
+ * Press & Hold     X               Operator          Move arm to Source position
+ * Press & Hold     A               Operator          Move arm to Amp position
+ * Press & Hold     Y               Operator          Move arm to Speaker position
+ * Press & Hold     -               Operator          Move arm to its neutral position
+ * Press & Hold     DPad Up         Operator          Ground intake takes note in
+ * Press & Hold     DPad Down       Operator          Ground intake pushes note out
  */
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -79,6 +80,9 @@ public class RobotContainer {
   // a chooser (similar to a dropdown list) for user to select which autonomous command to run
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   
+  //Limit Switches
+  DigitalInput bottomShooterLimit = new DigitalInput(0);
+
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
   CommandXboxController m_operatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
 
@@ -166,36 +170,28 @@ public class RobotContainer {
     // press button X of operator joystick to set the arm to source angle
     m_operatorController.x()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSource))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
                         ;
    
 ////
     // press button A of operator joystick to set the arm to its neutral position
-    m_operatorController.a()
-                        .onTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
+
+/*     m_operatorController.b()
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
                         ;
+*/                        
+
 ////
     // press button Y of operator joystick to set the arm to the Amp position
-    m_operatorController.y()
+    m_operatorController.a()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
                         ;
 
     // press button B of operator joystick to set the arm to the Speaker position
-    m_operatorController.b()
+    m_operatorController.y()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
                         ;                    
-    /* .onTrue(new RunCommand(()->{ m_arm.setArmIntakeAngle();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));*/
                         
 
-    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
-    /*m_operatorController.a()
-                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
-                        
-    */
    // -------------------------------- GROUND INTAKE --------------------------------------------
 
     m_operatorController.povUp()
