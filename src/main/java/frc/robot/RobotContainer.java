@@ -1,57 +1,32 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-/*
- * DATE CHANGE  CHANGE BY   REASON
- * -----------  ---------   ------------------------------------------------------------------------------------------
- * 02/16/2024   TRINH2      -Add 2 Auton. commands in Autos.java 
- *                              1. driveDistanceAuto(driveSubsystem, driveReversed, distanceMeters): drive half speed Forward (if driveReversed=false)
- *                                  or Reverse (if driveReversed=true) for a distance distanceMeters in meter
- *                              2. driveAlongPathAuto(driveSubsystem) to drive the robot along a predefined path
- *                          -Add Command method getAverageEncoderDistance() in DriveSubsystem.java to get the distance the robot ran since the last encoder reset
- *                              and Command method driveAlongPathAuto() to drive robot along a predefined path
- *                          -Add a drop-down list box (chooser) in RobotContainer.java to allow the user to choose which auton. command to run
- *                              This chooser appears in Shuffleboard under 'Autonomous' tab
- * 02/22/2024   TRINH2      -Change all occurences of 'Incliner' to 'Arm'. I think 'Arm' sounds better than 'Incliner'
- *                          -Per Tony's request, left stick drives forward/backward, right stick to turn (as before)
- * -------------------------------------------------------------------------------------------------------------------
- * ACTION         BUTTON          XBOXCONTROLLER    TO DO THIS
- * ------------   -------------   --------------    ---------------------------------------
- * Press & Hold   Right Trigger   Driver            Stop robot and lock wheel to form an 'X'
- * Press & Hold   Left Bumper     Driver            Strafe left
- * Press & Hold   Right Bumper    Driver            Strafe right 
- * 
- * Press once     Right Trigger   Operator          Shoot the note out
- * Press once     Left Trigger    Operator          Feed the note in
- * Press once     Left Bumper     Operator          Move Arm up
- * Press once     Right Bumper    Operator          Move Arm down
- * Press once     X               Operator          Move arm to Source position
- * Press once     Y               Operator          Move arm to Amp position
- * Press once     B               Operator          Move arm to Speaker position
- * Press once     A               Operator          Move arm to its neutral position
- * Press once     DPad Up         Operator          Ground intake takes note in
- * Press once     DPad Down       Operator          Ground intake pushes note out
- */
+
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.ArmSetAngle;
-import frc.robot.commands.Autos;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.InclinerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.GroundIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import java.util.List;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -64,20 +39,10 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   // Shooter subsystem
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  // Arm subsystem
-  private final ArmSubsystem m_arm = new ArmSubsystem();
-  // Ground Intake Subsystem
-  private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
+  // Incliner subsystem
+  private final InclinerSubsystem m_incliner = new InclinerSubsystem();
+
   // The driver's controller
-
-  // command to drive the robot in reverse for 1.5 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
-  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, AutoConstants.kAutoDriveReversed, AutoConstants.kAutoDriveDistanceMeters);
-
-  // command to drive the robot along a predefined path
-  private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
-
-  // a chooser (similar to a dropdown list) for user to select which autonomous command to run
-  SendableChooser<Command> m_chooser = new SendableChooser<>();
   
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
   CommandXboxController m_operatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
@@ -85,7 +50,6 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
@@ -93,22 +57,17 @@ public class RobotContainer {
     // Configure default commands
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
+            //To change translation from joystick to D-pad, refer to GenericHID API for getPov() method
+            //Test following code, rpelacing both lines 66 & 67: 
+            //-MathUtil.applyDeadband(m_driverController.getPov(), OIConstants.kDriveDeadband)
         // Turning is controlled by the X axis of the right stick.
         new RunCommand(
             () -> m_robotDrive.drive(
                 -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                false, true), 
+                false, true),
             m_robotDrive));
-
-    // add driveDistanceAuto commands to the command chooser as the default command
-    m_chooser.setDefaultOption("Drive a Distance", m_driveDistanceAuto);
-    // add 2nd auton command
-    m_chooser.addOption("Drive Along a Path", m_driveAlongPathAuto);
-
-    // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
-    Shuffleboard.getTab("Autonomous").add(m_chooser);
 
   }
 
@@ -121,7 +80,7 @@ public class RobotContainer {
    * passing it to a
    * {@link JoystickButton}.
    */
-   private void configureButtonBindings() {
+  private void configureButtonBindings() {
 
     // -------------------------------- CHASSIS --------------------------------------------
     
@@ -131,11 +90,11 @@ public class RobotContainer {
 
     // press left bumper for strafe true left
     m_driverController.leftBumper()
-        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, 0.5, 0, false, true), m_robotDrive));
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, .5, 0, true, true), m_robotDrive));
 
     // press right bumper for strafe true right
     m_driverController.rightBumper()
-        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, -0.5, 0, false, true), m_robotDrive));
+        .whileTrue(new RunCommand(()-> m_robotDrive.drive(0, -.5, 0, true, true), m_robotDrive));
         //Instead of ".whileTrue" so the operator must hold the button, could we use one command 
         //that locks the wheels .onTrue and another command that unloacks the wheels .onTrue?
 
@@ -150,61 +109,31 @@ public class RobotContainer {
                         .onTrue(Commands.runOnce(() ->{ m_shooter.shooterFeedNoteIn();}))
                         .onFalse(Commands.runOnce(() ->{ m_shooter.shooterStop();}));
 
-    // --------------------------------Arm -----------------------------------------------
-    // Arm moves up when leftBumper is hold, stop when release
+    // --------------------------------INCLINER -----------------------------------------------
+    // incliner moves up when leftBumper is hold, stop when release
 
-    // hold left bumper of operator joystick to turn the Arm up. Release the button will stop the Arm motor 
+    // hold left bumper of operator joystick to turn the incliner up. Release the button will stop the incliner motor 
     m_operatorController.leftBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_arm.armUp();}))
-                        .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerUp();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
 
-    // hold right bumper of operator joystick to turn the Arm down. Release the button will stop the Arm motor 
+    // hold right bumper of operator joystick to turn the incliner down. Release the button will stop the incliner motor 
     m_operatorController.rightBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_arm.armDown();}))
-                        .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
-
-    // press button X of operator joystick to set the arm to source angle
-    m_operatorController.x()
-                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSource))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
-                        ;
-   
-////
-    // press button A of operator joystick to set the arm to its neutral position
-    m_operatorController.a()
-                        .onTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
-                        ;
-////
-    // press button Y of operator joystick to set the arm to the Amp position
-    m_operatorController.y()
-                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))
-                        //.onFalse(Commands.runOnce(() ->{ m_arm.armStop();}))
-                        ;
-
-    // press button B of operator joystick to set the arm to the Speaker position
-    m_operatorController.b()
-                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
-                        ;                    
-    /* .onTrue(new RunCommand(()->{ m_arm.setArmIntakeAngle();}))
-                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));*/
-                        
-
-    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
-    /*m_operatorController.a()
                         .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
                         .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}));
-                        
-    */
-   // -------------------------------- GROUND INTAKE --------------------------------------------
 
-    m_operatorController.povUp()
-                        .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
-                        .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
-    // press DPad Down to push the note out
-    m_operatorController.povDown()
-                        .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteOut();}))
-                        .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
+    // press button B of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
+    m_operatorController.b()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.setInclinerIntakeAngle();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+                        ;
+
+    // press button A of operator joystick to set the angle to intake the note (for TESTING only). Remove this if it works
+    m_operatorController.a()
+                        .onTrue(Commands.runOnce(() ->{ m_incliner.inclinerDown();}))
+                        .onFalse(Commands.runOnce(() ->{ m_incliner.inclinerStop();}))
+                        ;
+
   }
 
   /**
@@ -212,10 +141,44 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
+  public Command getAutonomousCommand() {
+    // Create config for trajectory
+    TrajectoryConfig config = new TrajectoryConfig(
+        AutoConstants.kMaxSpeedMetersPerSecond,
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+        // Add kinematics to ensure max speed is actually obeyed
+        .setKinematics(DriveConstants.kDriveKinematics);
 
-  public Command getAutonomousCommand(){
-    return m_chooser.getSelected();    
+    // An example trajectory to follow. All units in meters.
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(0)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(3, 0, new Rotation2d(0)),
+        config);
+
+    var thetaController = new ProfiledPIDController(
+        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
+        exampleTrajectory,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
+
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
+
+    // Reset odometry to the starting pose of the trajectory.
+    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+
+    // Run path following command, then stop at the end.
+    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false, false));
   }
-  
-    
 }
