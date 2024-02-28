@@ -14,12 +14,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
+import edu.wpi.first.wpilibj.DigitalInput;
+
+
+
+//DigitalInput toplimitSwitch = new DigitalInput(0);
 
 // Arm subsystem is used to change the angle of the shooter
 public class ArmSubsystem extends SubsystemBase {
   private final CANSparkMax m_ArmMotor  = new CANSparkMax(ArmConstants.kArmMotorCANId, MotorType.kBrushless);
   private final RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
   private boolean m_armDown, m_armUp;
+  private DigitalInput armLimitSwitch = new DigitalInput(9);
 
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
@@ -49,28 +55,35 @@ public class ArmSubsystem extends SubsystemBase {
   // set a positive speed to make arm goes up
   public void armUp(){
     m_ArmMotor.set(ArmConstants.kArmSpeed);
+    m_armUp = true;
   }
 
   // set a negative speed to make arm goes down
   public void armDown(){
-    m_ArmMotor.set(-ArmConstants.kArmSpeed);
+    if (armLimitSwitch.get()) armStop();
+    else{ 
+      m_ArmMotor.set(-ArmConstants.kArmSpeed);
+      m_armDown = true;
+    }
+  }
+
+  public void armStop(){
+    m_armDown = true;
+    m_armUp = true;
+    m_ArmMotor.set(0.0);
   }
 
   public void setArmIntakeAngle(double angle){
     if (m_ArmEncoder.getPosition() < angle){
       armUp();
-      m_armUp = true;
       if (Constants.DEBUG) System.out.print("Arm Up ");
     }
     else if (m_ArmEncoder.getPosition() > angle){
       armDown();
-      m_armDown = true;
       if (Constants.DEBUG) System.out.print("Arm Down ");
     }
     else{
       armStop();
-      m_armDown = true;
-      m_armUp = true;
       if (Constants.DEBUG) System.out.print("Arm at target ");
     }
 
@@ -84,12 +97,16 @@ public class ArmSubsystem extends SubsystemBase {
     return m_armDown;
   }
 
-  public void armStop(){
-    m_ArmMotor.set(0.0);
-  }
-
   public double getArmPosition(){
     return m_ArmEncoder.getPosition();
   }
-  
+
+  /*public void isLimitSwitch(){
+    while (true) {//may not need extra while true because RobotContainer already contains .whileTrue()
+      if (armLimitSwitch.get()) {
+        armStop();
+        m_ArmEncoder.setPosition(0);
+      }
+  }
+  */
 }

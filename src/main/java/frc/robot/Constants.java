@@ -42,7 +42,7 @@ public final class Constants {
  * Arm (Arm) motor     7
  * 
  * Intake motor             6
- * 
+ * Limit Switch Channel channel 9
  */
   public static final boolean DEBUG = true;
   // OIConstants =================================================================================
@@ -162,6 +162,7 @@ public final class Constants {
 	  public static final double kArmSpeed = 0.2;
     public static final float kArmForwardLimit = 0;
     public static final float kArmReverseLimit = 0;
+    public static final int limitSwitchChannel = 9;
     
     public static final double kArmAngleNeutral = 0;        // -61°, 0° is horizontal
     public static final double kArmAngleSource = -25.40;    // 21°, 0° is horizontal
@@ -171,8 +172,7 @@ public final class Constants {
     
     public static final double kInclinerAngleGroundIntake =  0;
 
-    public static final int kArmMotorCurrentLimit = 40;     // amps
-    
+    public static final int kArmMotorCurrentLimit = 40;     // amps    
   }
 
   // InclinerConstants ========================================================================
@@ -217,6 +217,7 @@ public final class Constants {
     public static final double kAutoDriveSpeed = 0.5;  // speed of robot in Autonomous mode
     public static final boolean kAutoDriveReversed = false;
     public static final double kAutoDriveDistanceMeters = 0;
+
   }
 
   // NeoMotorConstants =========================================================================

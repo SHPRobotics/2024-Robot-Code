@@ -28,14 +28,13 @@
  * Press & Hold     X               Operator          Move arm to Source position
  * Press & Hold     A               Operator          Move arm to Amp position
  * Press & Hold     Y               Operator          Move arm to Speaker position
- * Press & Hold     -               Operator          Move arm to its neutral position
+ * Press & Hold     B               Operator          Move arm to its neutral position
  * Press & Hold     DPad Up         Operator          Ground intake takes note in
  * Press & Hold     DPad Down       Operator          Ground intake pushes note out
  */
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -81,7 +80,7 @@ public class RobotContainer {
   SendableChooser<Command> m_chooser = new SendableChooser<>();
   
   //Limit Switches
-  DigitalInput bottomShooterLimit = new DigitalInput(0);
+  //DigitalInput bottomShooterLimit = new DigitalInput(0);
 
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriveControllerPort); //Added Command xbox controller to be able to use built in trigger commands
   CommandXboxController m_operatorController = new CommandXboxController(OIConstants.kOperatorControllerPort); //Added Command xbox controller to be able to use built in trigger commands
@@ -174,11 +173,18 @@ public class RobotContainer {
    
 ////
     // press button A of operator joystick to set the arm to its neutral position
-
-/*     m_operatorController.b()
+     m_operatorController.b()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
+                        //.whileTrue(new RunCommand(()-> m_arm.isLimitSwitch(), m_arm))
+
                         ;
-*/                        
+                        //while (true){if (ArmSubsystem.isLimitSwitch){m_ArmEncoder.reset();}}
+
+
+                        // neutral or left shoulder...
+                        // continuously check if the button is pressed, and if the button is pressed, stop the motor immediately and set the encoder value to 0
+                        
+                      
 
 ////
     // press button Y of operator joystick to set the arm to the Amp position
