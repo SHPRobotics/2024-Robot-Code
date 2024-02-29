@@ -25,7 +25,7 @@ public class ArmSubsystem extends SubsystemBase {
   private final CANSparkMax m_ArmMotor  = new CANSparkMax(ArmConstants.kArmMotorCANId, MotorType.kBrushless);
   private final RelativeEncoder m_ArmEncoder = m_ArmMotor.getEncoder();
   private boolean m_armDown, m_armUp;
-  private DigitalInput armLimitSwitch = new DigitalInput(9);
+  private DigitalInput m_armLimitSwitch = new DigitalInput(9);
 
   /** Creates a new ArmSubsystem. */
   public ArmSubsystem() {
@@ -49,7 +49,7 @@ public class ArmSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // monitor the angle of the Arm
-    SmartDashboard.putNumber("Arm Encoder value", m_ArmEncoder.getPosition());
+    SmartDashboard.putBoolean("Limit Switch", m_armLimitSwitch.get());
   }
 
   // set a positive speed to make arm goes up
@@ -60,8 +60,13 @@ public class ArmSubsystem extends SubsystemBase {
 
   // set a negative speed to make arm goes down
   public void armDown(){
-    if (armLimitSwitch.get()) armStop();
+
+    if (m_armLimitSwitch.get()){ 
+      armStop();
+      m_ArmEncoder.setPosition(0);
+    }
     else{ 
+
       m_ArmMotor.set(-ArmConstants.kArmSpeed);
       m_armDown = true;
     }
@@ -100,6 +105,7 @@ public class ArmSubsystem extends SubsystemBase {
   public double getArmPosition(){
     return m_ArmEncoder.getPosition();
   }
+
 
   /*public void isLimitSwitch(){
     while (true) {//may not need extra while true because RobotContainer already contains .whileTrue()

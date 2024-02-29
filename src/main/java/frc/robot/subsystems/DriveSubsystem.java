@@ -70,10 +70,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   // distance the robot traveled
   private double m_distanceTraveled = 0;
-  private double m_previousX  =  0; 
-  private double m_previousY = 0;
-  private double m_currentX  =  0; 
-  private double m_currentY = 0;
+  //private double m_previousX  =  0; 
+  //private double m_previousY = 0;
+  //private double m_currentX  =  0; 
+  //private double m_currentY = 0;
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -91,6 +91,9 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // monitor the robot heading
     SmartDashboard.putNumber("Robot heading (deg): ", getHeading());
+    SmartDashboard.putNumber("FL encoder", m_frontLeft.getDrivingEncoderPosition());
+    SmartDashboard.putNumber("RL encoder", m_rearLeft.getDrivingEncoderPosition());
+
 
     // Update the odometry in the periodic block
     m_odometry.update(
@@ -101,7 +104,7 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
-
+/*
     // get the current position (x,y) of robot with respect to the field
     m_currentX = getPose().getX();
     m_currentY = getPose().getY();
@@ -114,7 +117,7 @@ public class DriveSubsystem extends SubsystemBase {
     // now the previous X,Y are the current X,Y and the loop cont
     m_previousX = m_currentX;
     m_previousY = m_currentY;
-
+*/
   }
 
   /**
@@ -264,6 +267,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getAverageEncoderDistance() {
+    m_distanceTraveled = (m_frontLeft.getDrivingEncoderPosition() + m_rearLeft.getDrivingEncoderPosition()) / 2.0;
     return m_distanceTraveled;
   }
 

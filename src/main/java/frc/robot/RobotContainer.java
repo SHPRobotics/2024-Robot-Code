@@ -39,7 +39,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.ArmSetAngle;
 import frc.robot.commands.Autos;
@@ -70,11 +69,41 @@ public class RobotContainer {
   private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
 
-  // command to drive the robot in reverse for 1.5 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
-  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, AutoConstants.kAutoDriveReversed, AutoConstants.kAutoDriveDistanceMeters);
+  // command to drive the robot forward for 1.0 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
+  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, false, 1.0);
 
   // command to drive the robot along a predefined path
   private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
+
+/*
+  // Red 1:
+            -shoot note into speaker
+            -drive reverse
+            -turn clockwise
+            -drive reverse->(parallel)->run ground intake motor 
+            -drive foward
+            -turn counterclockwise
+            -drive foward
+            -shoot note into speaker
+  // Red 2
+            -shoot note into speaker
+            -drive reverse->(parallel)->run ground intake motor
+            -drive foward
+            -shoot note into speaker
+  // Red 3
+            -shoot note into speaker
+            -drive reverse
+            -turn counterclockwise
+            -drive reverse->(parallel)->run ground intake motor 
+            -drive foward
+            -turn clockwise
+            -drive foward
+            -shoot note into speaker  
+  // Blue 1
+  // Blue 2
+  // Blue 3
+*/
+
 
   // a chooser (similar to a dropdown list) for user to select which autonomous command to run
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -156,14 +185,14 @@ public class RobotContainer {
     // --------------------------------Arm -----------------------------------------------
     // Arm moves up when leftBumper is hold, stop when release
 
-    // hold left bumper of operator joystick to turn the Arm up. Release the button will stop the Arm motor 
+    // hold left bumper of operator joystick to turn the Arm down. Release the button will stop the Arm motor 
     m_operatorController.leftBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_arm.armUp();}))
+                        .onTrue(Commands.runOnce(() ->{ m_arm.armDown();}))
                         .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
 
-    // hold right bumper of operator joystick to turn the Arm down. Release the button will stop the Arm motor 
+    // hold right bumper of operator joystick to turn the Arm up. Release the button will stop the Arm motor 
     m_operatorController.rightBumper()
-                        .onTrue(Commands.runOnce(() ->{ m_arm.armDown();}))
+                        .onTrue(Commands.runOnce(() ->{ m_arm.armUp();}))
                         .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
 
     // press button X of operator joystick to set the arm to source angle

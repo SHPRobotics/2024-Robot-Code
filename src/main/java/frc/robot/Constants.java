@@ -49,7 +49,7 @@ public final class Constants {
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
-    public static final double kDriveDeadband = 0.05;
+    public static final double kDriveDeadband = 0.08;  //0.05;
     public static final int kDriveControllerPort = 0;
   }
 
@@ -174,19 +174,6 @@ public final class Constants {
 
     public static final int kArmMotorCurrentLimit = 40;     // amps    
   }
-
-  // InclinerConstants ========================================================================
-  public static final class InclinerConstants {
-    public static final int kInclinerMotorCANId = 7;
-	  public static final double kInclinerSpeed = 0.2;
-    public static final float kInclinerForwardLimit = 0;
-    public static final float kInclinerReverseLimit = 0;
-    
-    public static final double kInclinerAngleIntake = -35.0;  // -31.2616;
-    public static final double kInclinerAngleAmp = -57.8102;
-    public static final double kInclinerAngleShooter = -14.9047;
-    //best fit equation for (angle, encoderValue) relationship: V = 
-  }
   
   // GroundIntakeConstants ========================================================================
   public static final class GroundIntakeConstants {
@@ -215,8 +202,6 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final double kAutoDriveSpeed = 0.5;  // speed of robot in Autonomous mode
-    public static final boolean kAutoDriveReversed = false;
-    public static final double kAutoDriveDistanceMeters = 0;
 
   }
 

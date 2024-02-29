@@ -38,8 +38,8 @@ public final class Autos {
       driveSubsystem::resetEncoders,
 
       // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) while command is executing
-      // in autonomous mode, robot drives in field-centric mode
-      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1), 0, 0, true, true), 
+      // robot drives in robot-centric mode (fieldRelative = false)
+      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1), 0, 0, false, true), 
 
       // onEnd: stop driving at the end of command
       interrupt -> driveSubsystem.setX(), 
