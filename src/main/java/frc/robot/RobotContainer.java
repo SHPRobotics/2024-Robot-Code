@@ -21,16 +21,15 @@
  * Press & Hold   Left Bumper     Driver            Strafe left
  * Press & Hold   Right Bumper    Driver            Strafe right 
  * 
- * Press & Hold     Right Trigger   Operator          Shoot the note out
- * Press & Hold     Left Trigger    Operator          Feed the note in
- * Press & Hold     Left Bumper     Operator          Move Arm up
- * Press & Hold     Right Bumper    Operator          Move Arm down
- * Press & Hold     X               Operator          Move arm to Source position
- * Press & Hold     A               Operator          Move arm to Amp position
- * Press & Hold     Y               Operator          Move arm to Speaker position
- * Press & Hold     B               Operator          Move arm to its neutral position
- * Press & Hold     DPad Up         Operator          Ground intake takes note in
- * Press & Hold     DPad Down       Operator          Ground intake pushes note out
+ * Press & Hold   Right Trigger   Operator          Shoot the note out
+ * Press & Hold   Left Trigger    Operator          Feed the note in
+ * Press & Hold   Left Bumper     Operator          Move Arm up
+ * Press & Hold   Right Bumper    Operator          Move Arm down
+ * Press & Hold   X               Operator          Move arm to Source position
+ * Press & Hold   A               Operator          Move arm to Amp position
+ * Press & Hold   Y               Operator          Move arm to Speaker position
+ * Press & Hold   DPad Up         Operator          Ground intake takes note in
+ * Press & Hold   DPad Down       Operator          Ground intake pushes note out
  */
 package frc.robot;
 
@@ -70,7 +69,7 @@ public class RobotContainer {
   // The driver's controller
 
   // command to drive the robot forward for 1.0 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
-  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, false, 1.0);
+  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, false, 5.0);
 
   // command to drive the robot along a predefined path
   private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
@@ -201,9 +200,11 @@ public class RobotContainer {
                         ;
    
 ////
-    // press button A of operator joystick to set the arm to its neutral position
-     m_operatorController.b()
-                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
+    // press button B of operator joystick to set the arm to its neutral position
+    // command ArmSetAngle will run only if LimitSwitch is not pressed
+    // m_operatorController.b()
+    //                    .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral)
+                        //              .unless(() -> !m_arm.iSLimitSwitchPressed()))
                         //.whileTrue(new RunCommand(()-> m_arm.isLimitSwitch(), m_arm))
 
                         ;
@@ -216,12 +217,12 @@ public class RobotContainer {
                       
 
 ////
-    // press button Y of operator joystick to set the arm to the Amp position
+    // press button A of operator joystick to set the arm to the Amp position
     m_operatorController.a()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))
                         ;
 
-    // press button B of operator joystick to set the arm to the Speaker position
+    // press button Y of operator joystick to set the arm to the Speaker position
     m_operatorController.y()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSpeaker))
                         ;                    

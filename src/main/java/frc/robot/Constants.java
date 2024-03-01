@@ -153,7 +153,8 @@ public final class Constants {
     public static final IdleMode kShooterMotorIdleMode = IdleMode.kBrake;
     public static final int kShooterMotorCurrentLimit = 40; // amps
     
-    public static final double kShooterSpeed = 1.0;
+    public static final double kShooterSpeedOut = 1.0;
+    public static final double kShooterSpeedIn = 0.3;
   }
 
   // ArmConstants ========================================================================
@@ -201,7 +202,7 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
-    public static final double kAutoDriveSpeed = 0.5;  // speed of robot in Autonomous mode
+    public static final double kAutoDriveSpeed = 0.2;  // speed of robot in Autonomous mode
 
   }
 

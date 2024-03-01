@@ -106,7 +106,10 @@ public class ArmSubsystem extends SubsystemBase {
     return m_ArmEncoder.getPosition();
   }
 
-
+  public boolean iSLimitSwitchPressed(){
+    return m_armLimitSwitch.get();
+  }
+  
   /*public void isLimitSwitch(){
     while (true) {//may not need extra while true because RobotContainer already contains .whileTrue()
       if (armLimitSwitch.get()) {

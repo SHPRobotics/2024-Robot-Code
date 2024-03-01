@@ -85,6 +85,8 @@ public class DriveSubsystem extends SubsystemBase {
         DriverStation.reportError("Error instantiating Navx gyro: " + e.getMessage(), true);
       }
     });
+
+    resetEncoders();
   }
 
   @Override
@@ -268,6 +270,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   public double getAverageEncoderDistance() {
     m_distanceTraveled = (m_frontLeft.getDrivingEncoderPosition() + m_rearLeft.getDrivingEncoderPosition()) / 2.0;
+    System.out.println("m_distanceTraveled: "+ m_distanceTraveled);
     return m_distanceTraveled;
   }
 

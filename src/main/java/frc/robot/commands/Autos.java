@@ -45,7 +45,8 @@ public final class Autos {
       interrupt -> driveSubsystem.setX(), 
 
       // isFinished: End the command when the robot's driven distance exceeds the desired value
-      () -> driveSubsystem.getAverageEncoderDistance() >= distanceMeters,
+      // for some reason, the real traveled distance is off by 0.5 meter !
+      () -> driveSubsystem.getAverageEncoderDistance() >= (distanceMeters ),
       
       // require the drive subsystem
       driveSubsystem);
