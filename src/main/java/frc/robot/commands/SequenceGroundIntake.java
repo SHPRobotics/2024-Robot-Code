@@ -23,7 +23,7 @@ public class SequenceGroundIntake extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ArmSetAngle(m_arm, ArmConstants.kInclinerAngleGroundIntake), 
+      new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral), 
       Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteOut();}));
     
   }

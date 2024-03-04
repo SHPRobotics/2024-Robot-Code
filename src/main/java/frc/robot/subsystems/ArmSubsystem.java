@@ -11,14 +11,11 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
-
-
-
-//DigitalInput toplimitSwitch = new DigitalInput(0);
 
 // Arm subsystem is used to change the angle of the shooter
 public class ArmSubsystem extends SubsystemBase {
@@ -48,28 +45,31 @@ public class ArmSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    // monitor the angle of the Arm
+    // monitor the Limit Switch status
     SmartDashboard.putBoolean("Limit Switch", m_armLimitSwitch.get());
+    SmartDashboard.putNumber("Arm Encoder", m_ArmEncoder.getPosition());
   }
 
-  // set a positive speed to make arm goes up
+  // set a negative speed to make arm goes up
   public void armUp(){
-    m_ArmMotor.set(ArmConstants.kArmSpeed);
+    m_ArmMotor.set(-ArmConstants.kArmSpeed);
     m_armUp = true;
   }
 
-  // set a negative speed to make arm goes down
+  // set a positive speed to make arm goes down
   public void armDown(){
 
-    if (m_armLimitSwitch.get()){ 
+    m_ArmMotor.set(ArmConstants.kArmSpeed);
+    m_armDown = true;
+    /*if (!m_armLimitSwitch.get()){ 
       armStop();
       m_ArmEncoder.setPosition(0);
     }
     else{ 
 
-      m_ArmMotor.set(-ArmConstants.kArmSpeed);
+      m_ArmMotor.set(ArmConstants.kArmSpeed);
       m_armDown = true;
-    }
+    }*/
   }
 
   public void armStop(){
@@ -78,12 +78,34 @@ public class ArmSubsystem extends SubsystemBase {
     m_ArmMotor.set(0.0);
   }
 
+  // same as armUp() except it is a Command
+  public Command armUpCmd(){
+    return this.runOnce(()->{m_ArmMotor.set(-ArmConstants.kArmSpeed);
+                              m_armUp = true;
+                            });
+  }
+
+  // same as armDown() except it is a Command
+  public Command armDownCmd(){
+    return this.runOnce(()->{m_ArmMotor.set(ArmConstants.kArmSpeed);
+                              m_armDown = true;
+                            });
+  }
+
+  // same as armStop() except it is a Command
+  public Command armStopCmd(){
+    return this.runOnce(()->{m_ArmMotor.set(0.0);
+                              m_armDown = true;
+                              m_armUp = true;
+                            });
+  }
+
   public void setArmIntakeAngle(double angle){
-    if (m_ArmEncoder.getPosition() < angle){
+    if (m_ArmEncoder.getPosition() > angle){
       armUp();
       if (Constants.DEBUG) System.out.print("Arm Up ");
     }
-    else if (m_ArmEncoder.getPosition() > angle){
+    else if (m_ArmEncoder.getPosition() < angle){
       armDown();
       if (Constants.DEBUG) System.out.print("Arm Down ");
     }
@@ -106,10 +128,14 @@ public class ArmSubsystem extends SubsystemBase {
     return m_ArmEncoder.getPosition();
   }
 
+  public void setArmPositionZero(){
+    m_ArmEncoder.setPosition(0);
+  }
+
   public boolean iSLimitSwitchPressed(){
     return m_armLimitSwitch.get();
   }
-  
+
   /*public void isLimitSwitch(){
     while (true) {//may not need extra while true because RobotContainer already contains .whileTrue()
       if (armLimitSwitch.get()) {

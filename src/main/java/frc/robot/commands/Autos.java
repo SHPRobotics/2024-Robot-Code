@@ -8,6 +8,8 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.GroundIntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 import java.util.List;
 
@@ -19,6 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -30,9 +33,8 @@ public final class Autos {
     return Commands.sequence(subsystem.exampleMethodCommand(), new ExampleCommand(subsystem));
   }
 
-  // we create 2 autonomous commands: driveDistanceAuto, driveAimShootAuto
   // 1. driveDistanceAuto(): drive forward / backward a specified distance then stop
-  public static Command driveDistanceAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters){
+  public static Command DriveDistanceAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters){
     return new FunctionalCommand(
       // onInit: reset encoders on command start
       driveSubsystem::resetEncoders,
@@ -52,6 +54,49 @@ public final class Autos {
       driveSubsystem);
   }
 
+  public static Command DriveDistanceAndTurnAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters, double turnAngleRad){
+    return new FunctionalCommand(
+      // onInit: reset encoders on command start
+      driveSubsystem::resetEncoders,
+
+      // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) while command is executing
+      // robot drives in robot-centric mode (fieldRelative = false)
+      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1), 0, turnAngleRad, false, true), 
+
+      // onEnd: stop driving at the end of command
+      interrupt -> driveSubsystem.setX(), 
+
+      // isFinished: End the command when the robot's driven distance exceeds the desired value
+      // for some reason, the real traveled distance is off by 0.5 meter !
+      () -> driveSubsystem.getAverageEncoderDistance() >= (distanceMeters ),
+      
+      // require the drive subsystem
+      driveSubsystem);
+  }
+  
+  /*
+  // Red 1:
+            -shoot note into speaker
+            -drive reverse
+            -turn clockwise
+            -drive reverse->(parallel)->run ground intake motor 
+            -drive foward
+            -turn counterclockwise
+            -drive foward
+            -shoot note into speaker
+*/
+  public Command red1 (DriveSubsystem driveSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
+    return Commands.sequence(
+      // -shoot note into speaker
+      shooterSubsystem.ShooterShootNoteOutCmd(),
+      // -drive reverse
+      new DriveDistancePID(driveSubsystem, true, 19.8),
+      // -turn clockwise
+      DriveDistanceAndTurnAuto(driveSubsystem, false, 0, -Units.degreesToRadians(0))
+    );
+  }
+
+  
   // 2. driveAlongPathAuto(): drive robot along a pre-defined path
   public static Command driveAlongPathAuto(DriveSubsystem driveSubsystem) {
     // Create config for trajectory

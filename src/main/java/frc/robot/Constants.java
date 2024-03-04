@@ -93,6 +93,9 @@ public final class Constants {
     public static final int kRearRightTurningCanId = 16;
 
     public static final boolean kGyroReversed = false;
+    public static final double ksVolts = 0;
+    public static final double kvVoltSecondsPerMeter = 0;
+    public static final double kaVoltSecondsSquaredPerMeter = 0;
   }
 
   // ModuleConstants ===============================================================================
@@ -160,20 +163,34 @@ public final class Constants {
   // ArmConstants ========================================================================
   public static final class ArmConstants {
     public static final int kArmMotorCANId = 7;
-	  public static final double kArmSpeed = 0.2;
+	  public static final double kArmSpeed = 0.35; // 0.2;
     public static final float kArmForwardLimit = 0;
     public static final float kArmReverseLimit = 0;
     public static final int limitSwitchChannel = 9;
     
-    public static final double kArmAngleNeutral = 0;        // -61°, 0° is horizontal
-    public static final double kArmAngleSource = -25.40;    // 21°, 0° is horizontal
-    public static final double kArmAngleAmp = -55.2861;       // -35°
+    public static final double kArmAngleNeutral = 0;          // -61°, 0° is horizontal
+    public static final double kArmAngleSource = -25.40;      // 21°, 0° is horizontal
+    public static final double kArmAngleAmp = -45.2861;       // -35°
     public static final double kArmAngleSpeaker = -7.1428;    // 57°
     //best fit equation for (angle, encoderValue) relationship: V = 
     
-    public static final double kInclinerAngleGroundIntake =  0;
+    //public static final double kInclinerAngleGroundIntake =  0; // change it to kArmAngleNeutral
 
     public static final int kArmMotorCurrentLimit = 40;     // amps    
+    public static final double kP = 1;
+    public static final double kMaxVelocityRadPerSecond = 3;
+    public static final double kMaxAccelerationRadPerSecSquared = 10;
+    private static final double kWheelDiameterInches = 6;
+    private static final double kEncoderCPR = 1024;
+    public static final double kEncoderDistancePerPulse = (kWheelDiameterInches * Math.PI) / (double) kEncoderCPR;
+    // The offset of the arm from the horizontal in its neutral position,
+    // measured from the horizontal
+    public static final double kArmOffsetRads = 0.5;
+
+    public static final double kSVolts = 1.0;
+    public static final double kGVolts = 1.0;
+    public static final double kVVoltSecondPerRad = 0.5;
+    public static final double kAVoltSecondSquaredPerRad = 0.1;
   }
   
   // GroundIntakeConstants ========================================================================
@@ -182,7 +199,7 @@ public final class Constants {
     public static final int kLeftGroundIntakeMotorCANId = 5;
     public static final int kTopGroundIntakeMotorCANId = 4;
     public static final double kGroundIntakeSpeed = 1;
-    public static final double kTopGroundIntakeSpeed = -1;
+    public static final double kTopGroundIntakeSpeed = 0.35;
     public static final IdleMode kGroundIntakeMotorIdleMode = IdleMode.kBrake;
     public static final int kGroundIntakeMotorCurrentLimit =40; //amps
   }

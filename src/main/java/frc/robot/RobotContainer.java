@@ -39,8 +39,10 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.ArmDown;
 import frc.robot.commands.ArmSetAngle;
 import frc.robot.commands.Autos;
+import frc.robot.commands.DriveDistancePID;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -68,22 +70,16 @@ public class RobotContainer {
   private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
 
-  // command to drive the robot forward for 1.0 meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
-  private final Command m_driveDistanceAuto = Autos.driveDistanceAuto(m_robotDrive, false, 5.0);
+  // command to drive the robot forward for x meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
+  // private final Command m_driveDistanceAuto = Autos.DriveDistanceAuto(m_robotDrive, false, 5.0);
+  private final Command m_driveDistanceAuto = new DriveDistancePID(m_robotDrive, false, 1.0);
 
+  private final Command m_driveDistanceAndTurnAuto = Autos.DriveDistanceAndTurnAuto(m_robotDrive, false, 5.0, Math.PI / 2.0);
   // command to drive the robot along a predefined path
   private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
 
-/*
-  // Red 1:
-            -shoot note into speaker
-            -drive reverse
-            -turn clockwise
-            -drive reverse->(parallel)->run ground intake motor 
-            -drive foward
-            -turn counterclockwise
-            -drive foward
-            -shoot note into speaker
+  //private final Command 
+            /*            
   // Red 2
             -shoot note into speaker
             -drive reverse->(parallel)->run ground intake motor
@@ -136,6 +132,8 @@ public class RobotContainer {
     // add driveDistanceAuto commands to the command chooser as the default command
     m_chooser.setDefaultOption("Drive a Distance", m_driveDistanceAuto);
     // add 2nd auton command
+    m_chooser.addOption("Drive a Distance and Turn", m_driveDistanceAndTurnAuto);
+    // add another auton command
     m_chooser.addOption("Drive Along a Path", m_driveAlongPathAuto);
 
     // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
@@ -185,9 +183,12 @@ public class RobotContainer {
     // Arm moves up when leftBumper is hold, stop when release
 
     // hold left bumper of operator joystick to turn the Arm down. Release the button will stop the Arm motor 
-    m_operatorController.leftBumper()
+   /*  m_operatorController.leftBumper()
                         .onTrue(Commands.runOnce(() ->{ m_arm.armDown();}))
                         .onFalse(Commands.runOnce(() ->{ m_arm.armStop();}));
+  */
+   m_operatorController.leftBumper()
+                        .whileTrue(new ArmDown(m_arm));
 
     // hold right bumper of operator joystick to turn the Arm up. Release the button will stop the Arm motor 
     m_operatorController.rightBumper()
@@ -202,8 +203,8 @@ public class RobotContainer {
 ////
     // press button B of operator joystick to set the arm to its neutral position
     // command ArmSetAngle will run only if LimitSwitch is not pressed
-    // m_operatorController.b()
-    //                    .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral)
+    //m_operatorController.b()
+    //                    .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
                         //              .unless(() -> !m_arm.iSLimitSwitchPressed()))
                         //.whileTrue(new RunCommand(()-> m_arm.isLimitSwitch(), m_arm))
 
@@ -231,7 +232,12 @@ public class RobotContainer {
    // -------------------------------- GROUND INTAKE --------------------------------------------
 
     m_operatorController.povUp()
-                        .onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
+                        //.onTrue(Commands.runOnce(() ->{ m_ground.GroundIntakeFeedNoteIn();}))
+                        .whileTrue(Commands.sequence(
+                                  //new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral),
+                                  new ArmDown(m_arm),
+                                  m_ground.GroundIntakeFeedNoteInCmd()
+                                ))
                         .onFalse(Commands.runOnce(() ->{ m_ground.GroundIntakeStop();}));
     // press DPad Down to push the note out
     m_operatorController.povDown()

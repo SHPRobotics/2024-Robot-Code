@@ -13,7 +13,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 
@@ -53,8 +53,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Shooter_Left RPM", m_leftEncoder.getVelocity());
-    SmartDashboard.putNumber("Shooter_Right RPM", m_rightEncoder.getVelocity());
+    //SmartDashboard.putNumber("Shooter_Left RPM", m_leftEncoder.getVelocity());
+   // SmartDashboard.putNumber("Shooter_Right RPM", m_rightEncoder.getVelocity());
 
   }
 /*
@@ -88,20 +88,46 @@ public class ShooterSubsystem extends SubsystemBase {
     m_leftMotor.set(-ShooterConstants.kShooterSpeedIn);
     m_rightMotor.set(ShooterConstants.kShooterSpeedIn);
   }
-  /*
-  public Command ShooterStop() {
+
+  public void shooterStop() {
+    m_leftMotor.set(0);
+    m_rightMotor.set(0);
+  }
+
+  // same as shooterShootNoteOut() except it is a Command class
+  public Command ShooterShootNoteOutCmd() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
         () -> {
-          m_leftMotor.set(0);
-          m_rightMotor.set(0);
-        });
-    }
-  */
+                m_leftMotor.set(ShooterConstants.kShooterSpeedOut);
+                m_rightMotor.set(-ShooterConstants.kShooterSpeedOut);
+              }
+    );
+  }
 
-    public void shooterStop() {
-          m_leftMotor.set(0);
-          m_rightMotor.set(0);
-    }
+  // same as shooterFeedNoteIn() except it is a Command class
+  public Command ShooterFeedNoteInCmd() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
+        () -> {
+                m_leftMotor.set(-ShooterConstants.kShooterSpeedIn);
+                m_rightMotor.set(ShooterConstants.kShooterSpeedIn);
+              }
+    );
+  }
+
+  // same as shooterStop() except it is a Command class
+  public Command ShooterStopCmd() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
+        () -> {
+                m_leftMotor.set(0);
+                m_rightMotor.set(0);
+              }
+    );
+  }
+
 }

@@ -25,21 +25,22 @@ public class ArmSetAngle extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_armUp = false;
-    m_armDown = false;
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(m_armSubsystem.getArmPosition() < m_angle){ 
+    if(m_armSubsystem.getArmPosition() > m_angle+1){ 
       m_armSubsystem.armUp();
       m_armUp = true;
+      m_armDown = false;
       System.out.println("Arm Up at position: "+m_armSubsystem.getArmPosition()+", target angle = "+ m_angle);
     }
-    else if(m_armSubsystem.getArmPosition() > m_angle){ 
+    else if(m_armSubsystem.getArmPosition() < m_angle-1){ 
       m_armSubsystem.armDown();
       m_armDown = true;
+      m_armUp = false;
       System.out.println("Arm Down at position: "+m_armSubsystem.getArmPosition()+", target angle = "+ m_angle);
     }
     else {
@@ -59,7 +60,7 @@ public class ArmSetAngle extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (m_armUp && m_armDown) return true;
+    if ((m_armUp && m_armDown)) return true;
     else return false;
   }
 }

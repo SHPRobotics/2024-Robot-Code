@@ -123,7 +123,7 @@ public class MAXSwerveModule {
   }
 
   /**
-   * Returns the current state of the module.
+   * Returns the current state (speed, angle) of the module.
    *
    * @return The current state of the module.
    */

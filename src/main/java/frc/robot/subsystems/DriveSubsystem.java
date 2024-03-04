@@ -157,12 +157,30 @@ public class DriveSubsystem extends SubsystemBase {
    * @param fieldRelative Whether the provided x and y speeds are relative to the
    *                      field.
    * @param rateLimit     Whether to enable rate limiting for smoother control.
+   * 
+   *                              ┌──────┐
+   *                              │ Gyro │
+   *                              └───┬──┘
+   *                                  │ Robot Heading
+   *                            ┌─────┴──────┐                        ┌────────────┐                            ┌──────────────────────────────────┐
+   *  ┌───────────┐             │ Convert to │                        │            ├── (Speed1, angle1) ──────> │ Apply speed1 & angle1 to wheel 1 │
+   *  │           ├── xSpeed ──>│   robot    ├── xSpeedCommanded ────>│ Calculate  │                            ╞══════════════════════════════════╡
+   *  │Joystick 1 ├── ySpeed ──>│ reference  ├── ySpeedCommanded ────>│ Speed &    ├── (Speed2, angle2) ──────> │ Apply speed2 & angle2 to wheel 2 │
+   *  └───────────┘             │   frame    │                        │ angle      │                            ╞══════════════════════════════════╡
+   *  ┌───────────┐             │ (Field or  │                        │ for each   ├── (Speed3, angle3) ──────> │ Apply speed3 & angle3 to wheel 3 │
+   *  │Joystick 2 ├── rot ─────>│   robot    ├── m_currentRotation ──>│ wheel      │                            ╞══════════════════════════════════╡
+   *  └───────────┘             │  centric)  │                        │            ├── (Speed4, angle4) ──────> │ Apply speed4 & angle4 to wheel 4 │
+   *                            └────────────┘                        └────────────┘                            └──────────────────────────────────┘
+   * 
+   *      Joystick Inputs ─────>              ── ChassisSpeeds ──────>             ── SwerveModuleState[4] ───>
+   * 
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
     
     double xSpeedCommanded;
     double ySpeedCommanded;
 
+    // Make the driving smoother by using the SlewRateLimiter
     if (rateLimit) {
       // Convert XY to polar for rate limiting
       double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
@@ -216,12 +234,27 @@ public class DriveSubsystem extends SubsystemBase {
     double ySpeedDelivered = ySpeedCommanded * DriveConstants.kMaxSpeedMetersPerSecond;
     double rotDelivered = m_currentRotation * DriveConstants.kMaxAngularSpeed;
 
+    // construct the desired ChassisSpeeds
+    ChassisSpeeds chassisSpeeds;
+    if (fieldRelative){
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(m_gyro.getAngle()));
+    }
+    else{
+      chassisSpeeds = new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+    }
+
+    // convert chassis speeds to individual module states
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+
+/*    
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(m_gyro.getAngle()))
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
+*/
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
     m_frontLeft.setDesiredState(swerveModuleStates[0], "FL");
     m_frontRight.setDesiredState(swerveModuleStates[1], "FR");
     m_rearLeft.setDesiredState(swerveModuleStates[2], "RL");
