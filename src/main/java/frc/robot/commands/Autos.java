@@ -4,8 +4,10 @@
 
 package frc.robot.commands;
 
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
@@ -25,7 +27,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public final class Autos {
   /** Example static factory for an autonomous command. */
@@ -33,15 +37,40 @@ public final class Autos {
     return Commands.sequence(subsystem.exampleMethodCommand(), new ExampleCommand(subsystem));
   }
 
-  // 1. driveDistanceAuto(): drive forward / backward a specified distance then stop
+  // DriveDistanceAuto(): drive forward / backward a specified distance then stop
   public static Command DriveDistanceAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters){
     return new FunctionalCommand(
       // onInit: reset encoders on command start
       driveSubsystem::resetEncoders,
 
-      // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) while command is executing
+      // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) at an angle while command is executing
       // robot drives in robot-centric mode (fieldRelative = false)
-      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1), 0, 0, false, true), 
+      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1) , 
+                                 0,  
+                             0, false, true), 
+
+      // onEnd: stop driving at the end of command
+      interrupt -> driveSubsystem.setX(), 
+
+      // isFinished: End the command when the robot's driven distance exceeds the desired value
+      // for some reason, the real traveled distance is off by 0.5 meter !
+      () -> driveSubsystem.getAverageEncoderDistance() >= (distanceMeters),
+      
+      // require the drive subsystem
+      driveSubsystem);
+  }
+
+  // StrafeDistanceAuto(): strafe right / left a specified distance then stop
+  public static Command StrafeDistanceAuto(DriveSubsystem driveSubsystem, boolean strafeLeft, double distanceMeters){
+    return new FunctionalCommand(
+      // onInit: reset encoders on command start
+      driveSubsystem::resetEncoders,
+
+      // onExecute: strafe left (if strafeLeft = true) or right (if strafeLeft = false) while command is executing
+      // robot drives in robot-centric mode (fieldRelative = false)
+      () -> driveSubsystem.drive(0,
+                                 AutoConstants.kAutoDriveSpeed * (strafeLeft ? 1 : -1) , 
+                             0, false, true), 
 
       // onEnd: stop driving at the end of command
       interrupt -> driveSubsystem.setX(), 
@@ -54,21 +83,49 @@ public final class Autos {
       driveSubsystem);
   }
 
-  public static Command DriveDistanceAndTurnAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters, double turnAngleRad){
+  // DriveAngleDistanceAuto(): drive forward / backward at an angle a specified distance then stop
+  public static Command DriveAngleDistanceAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters, double driveAngleDeg){
     return new FunctionalCommand(
       // onInit: reset encoders on command start
       driveSubsystem::resetEncoders,
 
-      // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) while command is executing
+      // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) at an angle while command is executing
       // robot drives in robot-centric mode (fieldRelative = false)
-      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1), 0, turnAngleRad, false, true), 
+/*
+      () -> driveSubsystem.drive(AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1) * Math.cos(Units.degreesToRadians(driveAngleDeg)), 
+                                 AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1) * Math.sin(Units.degreesToRadians(driveAngleDeg)),  
+                             0, false, true), 
+*/
+      ()-> driveSubsystem.omniDirectionStrafe(1, driveAngleDeg),
+      // onEnd: stop driving at the end of command
+      //interrupt -> driveSubsystem.setX(), 
+      interrupt -> driveSubsystem.stop(), 
+
+      // isFinished: End the command when the robot's driven distance exceeds the desired value
+      // for some reason, the real traveled distance is off by 0.5 meter !
+      () -> driveSubsystem.getAverageEncoderDistance() >= (distanceMeters),
+      
+      // require the drive subsystem
+      driveSubsystem);
+  }
+
+  // RotateRobotAuto(): rotate the robot at a specified angle then stop
+  public static Command RotateRobotAuto(DriveSubsystem driveSubsystem, boolean turnClockwise, double angleDeg){
+    return new FunctionalCommand(
+      // onInit: reset encoders on command start
+      driveSubsystem::zeroHeading,
+
+      // onExecute: strafe left (if strafeLeft = true) or right (if strafeLeft = false) while command is executing
+      // robot drives in robot-centric mode (fieldRelative = false)
+      () -> driveSubsystem.drive(0,
+                                 0 , 
+                             AutoConstants.kAutoTurnSpeed * (turnClockwise ? 1 : -1), false, true), 
 
       // onEnd: stop driving at the end of command
       interrupt -> driveSubsystem.setX(), 
 
       // isFinished: End the command when the robot's driven distance exceeds the desired value
-      // for some reason, the real traveled distance is off by 0.5 meter !
-      () -> driveSubsystem.getAverageEncoderDistance() >= (distanceMeters ),
+      () -> Math.abs(driveSubsystem.getHeading()) >= Math.abs((angleDeg)),
       
       // require the drive subsystem
       driveSubsystem);
@@ -85,17 +142,91 @@ public final class Autos {
             -drive foward
             -shoot note into speaker
 */
-  public Command red1 (DriveSubsystem driveSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
+  public static Command turnTwice (DriveSubsystem driveSubsystem){
     return Commands.sequence(
+      RotateRobotAuto(driveSubsystem, false, 90),
+      new WaitCommand(1),
+      RotateRobotAuto(driveSubsystem, true, 90)
+    );
+  }
+  public static Command red1 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
+    return Commands.sequence(
+      // set arm to speaker position
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      new WaitCommand(1),
       // -shoot note into speaker
       shooterSubsystem.ShooterShootNoteOutCmd(),
-      // -drive reverse
-      new DriveDistancePID(driveSubsystem, true, 19.8),
+      new WaitCommand(1),
+      //stop shooter
+      shooterSubsystem.ShooterStopCmd(),
+      //Bring arm down
+      new ArmDown(armSubsystem),
+      // -drive back
+      DriveDistanceAuto(driveSubsystem, true, .5),
       // -turn clockwise
-      DriveDistanceAndTurnAuto(driveSubsystem, false, 0, -Units.degreesToRadians(0))
+      RotateRobotAuto(driveSubsystem, true, -45),
+      //drive back while intaking
+      new ParallelCommandGroup(
+        DriveDistanceAuto(driveSubsystem, true, 1),
+        groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
+      new WaitCommand(1),
+      //stop Ground intake
+      groundIntakeSubsystem.GroundIntakeStopCmd(),
+      //drive foward
+      DriveDistanceAuto(driveSubsystem, false, .5),
+      //turn counterclockwise
+      RotateRobotAuto(driveSubsystem, false, 45)/* ,
+      //drive foward
+      DriveDistanceAuto(driveSubsystem, false, .6),
+      //set speaker angle
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      new WaitCommand(1),
+      //shoot note
+      shooterSubsystem.ShooterShootNoteOutCmd(),
+      new WaitCommand(1),
+      //stop shooter
+      shooterSubsystem.ShooterStopCmd()*/
     );
   }
 
+  public static Command red2 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem) {
+    return Commands.sequence(
+   /* //set arm zero
+    new ArmDown(armSubsystem),*/
+    //set arm to speaker position
+    new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+    new WaitCommand(1),
+    //shoot note
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //wait 2 secs
+    new WaitCommand(1),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd(),
+    //bring arm to zero
+    new ArmDown(armSubsystem),
+    //drive back to note while intaking
+    new ParallelCommandGroup(
+      DriveDistanceAuto(driveSubsystem, true, 2),
+      groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()), 
+    //wait 2 secs
+    new WaitCommand(1),
+    //stop ground intake
+    groundIntakeSubsystem.GroundIntakeStopCmd(), 
+    //drive foward
+    DriveDistanceAuto(driveSubsystem, false, 2.1),
+    //set arm to speaker angle
+    new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+    //shoot note
+    new WaitCommand(1),
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //wait 2 secs
+    new WaitCommand(1),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd(),
+    //drive backwards behind the line
+    DriveDistanceAuto(driveSubsystem, true, 2)  
+    );
+  }
   
   // 2. driveAlongPathAuto(): drive robot along a pre-defined path
   public static Command driveAlongPathAuto(DriveSubsystem driveSubsystem) {

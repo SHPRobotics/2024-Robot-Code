@@ -35,6 +35,7 @@ package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.ArmConstants;
@@ -48,6 +49,7 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.GroundIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -70,16 +72,33 @@ public class RobotContainer {
   private final GroundIntakeSubsystem m_ground = new GroundIntakeSubsystem();
   // The driver's controller
 
-  // command to drive the robot forward for x meters (Note: kAutoDriveReversed, kAutoDriveDistanceMeters are defined in Constants.java in case we want to change the direction and distance)
-  // private final Command m_driveDistanceAuto = Autos.DriveDistanceAuto(m_robotDrive, false, 5.0);
-  private final Command m_driveDistanceAuto = new DriveDistancePID(m_robotDrive, false, 1.0);
+  // auton command to drive the robot forward for 1 meters (using 'Bangbang Control')
+  private final Command m_DriveDistanceAuto = Autos.DriveDistanceAuto(m_robotDrive, false, 2.0);
+  // auton command to drive the robot forward for 1 meters (using 'PID Control')
+  private final Command m_DriveDistancePIDAuto = new DriveDistancePID(m_robotDrive, false, 1.0, 90.0);
 
-  private final Command m_driveDistanceAndTurnAuto = Autos.DriveDistanceAndTurnAuto(m_robotDrive, false, 5.0, Math.PI / 2.0);
+  // auto Command to strafe right 1 meter then stop (using 'Bangbang Control')
+  private final Command m_StrafeDistanceAuto = Autos.StrafeDistanceAuto(m_robotDrive, false, 1.0);
+
+  // auto Command to drive forward 1 meter at an 30 degree angle (using 'Bangbang Control')
+  private final Command m_DriveAngleDistanceAuto = Autos.DriveAngleDistanceAuto(m_robotDrive, false, 4.0, 45);
+
+  // auto comand to rotate the robot at an angle
+  private final Command m_RotateRobotAuto = Autos.RotateRobotAuto(m_robotDrive, false, 45);
+
   // command to drive the robot along a predefined path
-  private final Command m_driveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
+  private final Command m_DriveAlongPathAuto = Autos.driveAlongPathAuto(m_robotDrive);
 
-  //private final Command 
-            /*            
+  //test auton code for turning
+  private final Command m_TurnTwice = Autos.turnTwice(m_robotDrive);
+
+  //auto command when robot is positioned at red 1
+  private final Command m_Red1 = Autos.red1(m_robotDrive, m_arm, m_shooter, m_ground);
+
+  //auto command when robot is positioned at red 2
+  private final Command m_Red2 = Autos.red2(m_robotDrive, m_arm, m_shooter, m_ground);
+
+/*            
   // Red 2
             -shoot note into speaker
             -drive reverse->(parallel)->run ground intake motor
@@ -129,15 +148,44 @@ public class RobotContainer {
                 false, true), 
             m_robotDrive));
 
-    // add driveDistanceAuto commands to the command chooser as the default command
-    m_chooser.setDefaultOption("Drive a Distance", m_driveDistanceAuto);
-    // add 2nd auton command
-    m_chooser.addOption("Drive a Distance and Turn", m_driveDistanceAndTurnAuto);
-    // add another auton command
-    m_chooser.addOption("Drive Along a Path", m_driveAlongPathAuto);
+    // add driveDistanceAuto commands (using 'Bangbang Control') to the command chooser as the default command
+    m_chooser.setDefaultOption("Drive a Distance", m_DriveDistanceAuto);
+    // add auton command to strafe a distance (using 'Bangbang Control')
+    m_chooser.addOption("Strafe a distance", m_StrafeDistanceAuto);
+    // add auton command to drive at an angle (using 'Bangbang Control')
+    m_chooser.addOption("Drive at angle", m_DriveAngleDistanceAuto);
+    // add driveDistancePIDAuto commands (using 'PID Control')
+    m_chooser.addOption("Drive Dist PID", m_DriveDistancePIDAuto);
+    // add RotateRobotAuto command to rotate the robot to a specified angle
+    m_chooser.addOption("Rotate Robot", m_RotateRobotAuto);
+    // add auton command to drive along predefined path
+    m_chooser.addOption("Drive Along a Path", m_DriveAlongPathAuto);
+    //test code for robot turning
+    m_chooser.addOption("Turn Twice", m_TurnTwice);
+    //add auton command at red 1 position
+    m_chooser.addOption("Red 1 Auto", m_Red1);
+    //add auton command at red 2 position
+    m_chooser.addOption("Red 2 Auto", m_Red2);
 
     // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
     Shuffleboard.getTab("Autonomous").add(m_chooser);
+
+    // Set the scheduler to log Shuffleboard events for command initialize, interrupt, finish
+    CommandScheduler.getInstance()
+        .onCommandInitialize(
+            command ->
+                Shuffleboard.addEventMarker(
+                    "Command initialized", command.getName(), EventImportance.kNormal));
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            command ->
+                Shuffleboard.addEventMarker(
+                    "Command interrupted", command.getName(), EventImportance.kNormal));
+    CommandScheduler.getInstance()
+        .onCommandFinish(
+            command ->
+                Shuffleboard.addEventMarker(
+                    "Command finished", command.getName(), EventImportance.kNormal));
 
   }
 

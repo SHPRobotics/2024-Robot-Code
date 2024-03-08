@@ -70,10 +70,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   // distance the robot traveled
   private double m_distanceTraveled = 0;
-  //private double m_previousX  =  0; 
-  //private double m_previousY = 0;
-  //private double m_currentX  =  0; 
-  //private double m_currentY = 0;
+  private double m_odometryDistanceTraveled = 0;
+  private double m_previousX  =  0; 
+  private double m_previousY = 0;
+  private double m_currentX  =  0; 
+  private double m_currentY = 0;
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -86,16 +87,33 @@ public class DriveSubsystem extends SubsystemBase {
       }
     });
 
+    // set invert driving encoders
+    //m_frontLeft.getDrivingEncoder().setInverted(true);
+    //m_frontRight.getDrivingEncoder().setInverted(true);
+    //m_rearLeft.getDrivingEncoder().setInverted(false);
+    //m_rearRight.getDrivingEncoder().setInverted(false);
+
     resetEncoders();
+
   }
 
   @Override
   public void periodic() {
     // monitor the robot heading
     SmartDashboard.putNumber("Robot heading (deg): ", getHeading());
-    SmartDashboard.putNumber("FL encoder", m_frontLeft.getDrivingEncoderPosition());
-    SmartDashboard.putNumber("RL encoder", m_rearLeft.getDrivingEncoderPosition());
+    SmartDashboard.putNumber("Avg Dist Traveled (meters)",getAverageEncoderDistance());
+    SmartDashboard.putString("current robot pos", m_currentX + ", "+ m_currentY);
+    SmartDashboard.putNumber("dist from odometry", m_odometryDistanceTraveled);
 
+    SmartDashboard.putNumber("FL Driving Encoder", m_frontLeft.getDrivingEncoder().getPosition());
+    SmartDashboard.putNumber("FR Driving Encoder", m_frontRight.getDrivingEncoder().getPosition());
+    SmartDashboard.putNumber("RL Driving Encoder", m_rearLeft.getDrivingEncoder().getPosition());
+    SmartDashboard.putNumber("RR Driving Encoder", m_rearRight.getDrivingEncoder().getPosition());
+
+    SmartDashboard.putNumber("FL Turning Encoder", m_frontLeft.getTurningEncoder().getPosition());
+    SmartDashboard.putNumber("FR Turning Encoder", m_frontRight.getTurningEncoder().getPosition());
+    SmartDashboard.putNumber("RL Turning Encoder", m_rearLeft.getTurningEncoder().getPosition());
+    SmartDashboard.putNumber("RR Turning Encoder", m_rearRight.getTurningEncoder().getPosition());
 
     // Update the odometry in the periodic block
     m_odometry.update(
@@ -106,20 +124,20 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
-/*
+
     // get the current position (x,y) of robot with respect to the field
     m_currentX = getPose().getX();
     m_currentY = getPose().getY();
 
     //                                   __________________________________________________
     // The total distance is the sum of √ (currentX - previousX)² + (currentY - previousY)²
-    m_distanceTraveled += Math.sqrt(Math.pow((m_currentX - m_previousX), 2) +
+    m_odometryDistanceTraveled += Math.sqrt(Math.pow((m_currentX - m_previousX), 2) +
                                     Math.pow((m_currentY - m_previousY), 2));
 
     // now the previous X,Y are the current X,Y and the loop cont
     m_previousX = m_currentX;
     m_previousY = m_currentY;
-*/
+
   }
 
   /**
@@ -158,21 +176,21 @@ public class DriveSubsystem extends SubsystemBase {
    *                      field.
    * @param rateLimit     Whether to enable rate limiting for smoother control.
    * 
-   *                              ┌──────┐
-   *                              │ Gyro │
-   *                              └───┬──┘
-   *                                  │ Robot Heading
-   *                            ┌─────┴──────┐                        ┌────────────┐                            ┌──────────────────────────────────┐
-   *  ┌───────────┐             │ Convert to │                        │            ├── (Speed1, angle1) ──────> │ Apply speed1 & angle1 to wheel 1 │
-   *  │           ├── xSpeed ──>│   robot    ├── xSpeedCommanded ────>│ Calculate  │                            ╞══════════════════════════════════╡
-   *  │Joystick 1 ├── ySpeed ──>│ reference  ├── ySpeedCommanded ────>│ Speed &    ├── (Speed2, angle2) ──────> │ Apply speed2 & angle2 to wheel 2 │
-   *  └───────────┘             │   frame    │                        │ angle      │                            ╞══════════════════════════════════╡
-   *  ┌───────────┐             │ (Field or  │                        │ for each   ├── (Speed3, angle3) ──────> │ Apply speed3 & angle3 to wheel 3 │
-   *  │Joystick 2 ├── rot ─────>│   robot    ├── m_currentRotation ──>│ wheel      │                            ╞══════════════════════════════════╡
-   *  └───────────┘             │  centric)  │                        │            ├── (Speed4, angle4) ──────> │ Apply speed4 & angle4 to wheel 4 │
-   *                            └────────────┘                        └────────────┘                            └──────────────────────────────────┘
-   * 
-   *      Joystick Inputs ─────>              ── ChassisSpeeds ──────>             ── SwerveModuleState[4] ───>
+   *                              ┌──────┐                            ┌──────┐                          ┌──────┐                              ┌──────┐
+   *                              │ Gyro │                            │ Gyro │                          │ Gyro │                              │ Gyro │
+   *                              └───┬──┘                            └───┬──┘                          └───┬──┘                              └───┬──┘
+   *                                  │ Robot Heading                     │ Robot Heading                   │ Robot Heading                       │ Robot Heading                     
+   *                            ┌─────┴──────┐                      ┌─────┴──────┐                    ┌─────┴──────┐                        ┌─────┴──────┐                            ┌──────────────────────────────────┐
+   *  ┌───────────┐             │            │                      │ Scale down │                    │ Construct  │                        │  Convert   ├── (Speed1, angle1) ──────> │ Apply speed1 & angle1 to wheel 1 │
+   *  │           ├── xSpeed ──>│   Apply    ├── xSpeedCommanded ──>│ speeds to  ├─ xSpeedDelivered ─>│ ChassisSpd ├── xSpeedDelivered ────>│ ChassisSpd │                            ╞══════════════════════════════════╡
+   *  │Joystick 1 ├── ySpeed ──>│  SlewRate  ├── ySpeedCommanded ──>│ meet the   ├─ ySpeedDelivered ─>│ reference  ├── ySpeedDelivered ────>│  to Module ├── (Speed2, angle2) ──────> │ Apply speed2 & angle2 to wheel 2 │
+   *  └───────────┘             │   Limiter  │                      │   max.     │                    │   frame    │                        │   State    │                            ╞══════════════════════════════════╡
+   *  ┌───────────┐             │  to drive  │                      │ physical   │                    │ (Field or  │                        │  of each   ├── (Speed3, angle3) ──────> │ Apply speed3 & angle3 to wheel 3 │
+   *  │Joystick 2 ├── rot ─────>│  smoothly  ├─ m_currentRotation ─>│  speed of  ├── rotDelivered ───>│   robot    ├── rotDelivered ───────>│   wheel    │                            ╞══════════════════════════════════╡
+   *  └───────────┘             │            │                      │ the robot  │                    │  centric)  │                        │            ├── (Speed4, angle4) ──────> │ Apply speed4 & angle4 to wheel 4 │
+   *                            └────────────┘                      └────────────┘                    └────────────┘                        └────────────┘                            └──────────────────────────────────┘
+   *                                 (1)                                 (2)                               (3)                                   (4)                                                 (5)
+   *      Joystick Inputs ─────>                                                                                    ── ChassisSpeeds ──────>             ── SwerveModuleState[4] ───>
    * 
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
@@ -180,7 +198,7 @@ public class DriveSubsystem extends SubsystemBase {
     double xSpeedCommanded;
     double ySpeedCommanded;
 
-    // Make the driving smoother by using the SlewRateLimiter
+    // (1) Make the driving smoother by using the SlewRateLimiter
     if (rateLimit) {
       // Convert XY to polar for rate limiting
       double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
@@ -229,12 +247,12 @@ public class DriveSubsystem extends SubsystemBase {
       m_currentRotation = rot;
     }
 
-    // Convert the commanded speeds into the correct units for the drivetrain
+    // (2) Convert the commanded speeds into the correct units for the drivetrain
     double xSpeedDelivered = xSpeedCommanded * DriveConstants.kMaxSpeedMetersPerSecond;
     double ySpeedDelivered = ySpeedCommanded * DriveConstants.kMaxSpeedMetersPerSecond;
     double rotDelivered = m_currentRotation * DriveConstants.kMaxAngularSpeed;
 
-    // construct the desired ChassisSpeeds
+    // (3) construct the desired ChassisSpeeds
     ChassisSpeeds chassisSpeeds;
     if (fieldRelative){
       chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(m_gyro.getAngle()));
@@ -243,7 +261,7 @@ public class DriveSubsystem extends SubsystemBase {
       chassisSpeeds = new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
     }
 
-    // convert chassis speeds to individual module states
+    // (4) convert chassis speeds to individual module states
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 
 /*    
@@ -252,9 +270,11 @@ public class DriveSubsystem extends SubsystemBase {
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered, Rotation2d.fromDegrees(m_gyro.getAngle()))
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
 */
+    // distribute speeds evenly to each module to stabilize the robot
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
 
+    // (5) apply speed, angle to each wheel
     m_frontLeft.setDesiredState(swerveModuleStates[0], "FL");
     m_frontRight.setDesiredState(swerveModuleStates[1], "FR");
     m_rearLeft.setDesiredState(swerveModuleStates[2], "RL");
@@ -269,6 +289,17 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), "FR");
     m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)), "RL");
     m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)), "RR");
+  }
+
+  public void stop(){
+    drive(0,0,0,false, true);
+  }
+
+  public void omniDirectionStrafe(double speed, double angle) {
+    m_frontLeft.setDesiredState(new SwerveModuleState(speed, Rotation2d.fromDegrees(angle)), "FL");
+    m_frontRight.setDesiredState(new SwerveModuleState(speed, Rotation2d.fromDegrees(angle)), "FR");
+    m_rearLeft.setDesiredState(new SwerveModuleState(speed, Rotation2d.fromDegrees(angle)), "RL");
+    m_rearRight.setDesiredState(new SwerveModuleState(speed, Rotation2d.fromDegrees(angle)), "RR");
   }
 
   /**
@@ -294,6 +325,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearRight.resetEncoders();
 
     m_distanceTraveled = 0.0;
+    m_odometryDistanceTraveled = 0;
   }
 
   /** Zeroes the heading of the robot. */
@@ -302,8 +334,14 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public double getAverageEncoderDistance() {
-    m_distanceTraveled = (m_frontLeft.getDrivingEncoderPosition() + m_rearLeft.getDrivingEncoderPosition()) / 2.0;
-    System.out.println("m_distanceTraveled: "+ m_distanceTraveled);
+    
+    m_distanceTraveled = (Math.abs(m_frontLeft.getDrivingEncoderPosition()) + 
+                          Math.abs(m_rearLeft.getDrivingEncoderPosition()) + 
+                          Math.abs(m_frontRight.getDrivingEncoderPosition()) +
+                          Math.abs(m_rearRight.getDrivingEncoderPosition())
+                          ) / 4.0;
+    
+    //System.out.println("m_distanceTraveled: "+ m_distanceTraveled);
     return m_distanceTraveled;
   }
 
@@ -313,7 +351,8 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
+    //return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
+    return Math.IEEEremainder(m_gyro.getAngle(), 360);
   }
 
   public Rotation2d getRotation2d(){

@@ -11,7 +11,6 @@ package frc.robot.subsystems;
 // 6th test
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,7 +18,7 @@ import frc.robot.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
   private final CANSparkMax m_leftMotor, m_rightMotor;
-  private final RelativeEncoder m_leftEncoder, m_rightEncoder;
+  //private final RelativeEncoder m_leftEncoder, m_rightEncoder;
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
     // motors
@@ -45,8 +44,8 @@ public class ShooterSubsystem extends SubsystemBase {
     m_rightMotor.burnFlash();
 
     // encoders
-    m_leftEncoder = m_leftMotor.getEncoder();
-    m_rightEncoder = m_leftMotor.getEncoder();
+    //m_leftEncoder = m_leftMotor.getEncoder();
+    //m_rightEncoder = m_leftMotor.getEncoder();
 
   }
 

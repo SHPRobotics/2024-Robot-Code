@@ -182,4 +182,12 @@ public class MAXSwerveModule {
   public double getDrivingEncoderPosition(){
     return m_drivingEncoder.getPosition();
   }
+
+  public RelativeEncoder getDrivingEncoder(){
+    return m_drivingEncoder;
+  }
+
+  public SparkAbsoluteEncoder getTurningEncoder(){
+    return m_turningEncoder;
+  }
 }
