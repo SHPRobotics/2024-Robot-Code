@@ -171,7 +171,7 @@ public final class Constants {
     public static final double kArmAngleNeutral = 0;          // 
     public static final double kArmAngleSource = -20;      // 
     public static final double kArmAngleAmp = -47;       // 
-    public static final double kArmAngleSpeaker = -3;    // 
+    public static final double kArmAngleSpeaker = -2.5;    // 
     //best fit equation for (angle, encoderValue) relationship: V = 
     
     //public static final double kInclinerAngleGroundIntake =  0; // change it to kArmAngleNeutral
@@ -219,8 +219,9 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
-    public static final double kAutoDriveSpeed = 0.1;  // speed of robot in Autonomous mode
+    public static final double kAutoDriveSpeed = 0.25;  // speed of robot in Autonomous mode
     public static final double kAutoTurnSpeed = 0.3;  // speed of robot in Autonomous mode
+    public static final double kAutoArmSpeed = 0.2; // speed of arm in Autonomous mode
 
   }
 

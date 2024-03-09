@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -96,7 +95,7 @@ public final class Autos {
                                  AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1) * Math.sin(Units.degreesToRadians(driveAngleDeg)),  
                              0, false, true), 
 */
-      ()-> driveSubsystem.omniDirectionStrafe(1, driveAngleDeg),
+      ()-> driveSubsystem.omniDirectionStrafe(1* (driveReversed ? -1 : 1), driveAngleDeg),
       // onEnd: stop driving at the end of command
       //interrupt -> driveSubsystem.setX(), 
       interrupt -> driveSubsystem.stop(), 
@@ -119,13 +118,13 @@ public final class Autos {
       // robot drives in robot-centric mode (fieldRelative = false)
       () -> driveSubsystem.drive(0,
                                  0 , 
-                             AutoConstants.kAutoTurnSpeed * (turnClockwise ? 1 : -1), false, true), 
+                             AutoConstants.kAutoTurnSpeed * (turnClockwise ? -1 : 1), false, true), 
 
       // onEnd: stop driving at the end of command
       interrupt -> driveSubsystem.setX(), 
 
       // isFinished: End the command when the robot's driven distance exceeds the desired value
-      () -> Math.abs(driveSubsystem.getHeading()) >= Math.abs((angleDeg)),
+      () -> Math.abs(driveSubsystem.getGyro().getAngle()) >= Math.abs((angleDeg)),
       
       // require the drive subsystem
       driveSubsystem);
@@ -144,9 +143,9 @@ public final class Autos {
 */
   public static Command turnTwice (DriveSubsystem driveSubsystem){
     return Commands.sequence(
-      RotateRobotAuto(driveSubsystem, false, 90),
+      RotateRobotAuto(driveSubsystem, false, 180),
       new WaitCommand(1),
-      RotateRobotAuto(driveSubsystem, true, 90)
+      RotateRobotAuto(driveSubsystem, true, 180)
     );
   }
   public static Command red1 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
@@ -198,7 +197,7 @@ public final class Autos {
     new WaitCommand(1),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
-    //wait 2 secs
+    //wait
     new WaitCommand(1),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
@@ -206,20 +205,19 @@ public final class Autos {
     new ArmDown(armSubsystem),
     //drive back to note while intaking
     new ParallelCommandGroup(
-      DriveDistanceAuto(driveSubsystem, true, 2),
+      DriveDistanceAuto(driveSubsystem, true, 1.5),
       groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()), 
-    //wait 2 secs
+    //wait
     new WaitCommand(1),
     //stop ground intake
     groundIntakeSubsystem.GroundIntakeStopCmd(), 
-    //drive foward
-    DriveDistanceAuto(driveSubsystem, false, 2.1),
-    //set arm to speaker angle
-    new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+    //drive foward while setting arm angle
+    new ParallelCommandGroup(
+      DriveDistanceAuto(driveSubsystem, false, 1.6),
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
     //shoot note
-    new WaitCommand(1),
     shooterSubsystem.ShooterShootNoteOutCmd(),
-    //wait 2 secs
+    //wait
     new WaitCommand(1),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
@@ -227,7 +225,63 @@ public final class Autos {
     DriveDistanceAuto(driveSubsystem, true, 2)  
     );
   }
-  
+  public static Command fullRed2 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
+    return Commands.sequence(
+      /* //set arm zero
+    new ArmDown(armSubsystem),*/
+    //set arm to speaker position
+    new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+    new WaitCommand(1.5),
+    //shoot note
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //waits
+    new WaitCommand(.75),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd(),
+    //drive back to note while intaking
+    new ParallelCommandGroup(
+      //bring arm to zero
+      new ArmDown(armSubsystem), 
+      DriveDistanceAuto(driveSubsystem, true, 1.5),
+      groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()), 
+    //wait
+    new WaitCommand(.75),
+    //stop ground intake
+    groundIntakeSubsystem.GroundIntakeStopCmd(), 
+    //drive foward while setting arm angle
+    new ParallelCommandGroup(
+      DriveDistanceAuto(driveSubsystem, false, 1.55),
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //shoot note
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //wait
+    new WaitCommand(.75),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd(),
+    //position behind note by strafing at an angle
+    DriveAngleDistanceAuto(driveSubsystem, true, 1.5, 60),
+    //drive back while intaking
+    new ParallelCommandGroup(
+      //bring arm down
+      new ArmDown(armSubsystem),
+      DriveDistanceAuto(driveSubsystem, true, 1),
+      groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
+    //wait
+    new WaitCommand(.75),
+    //stop ground intake
+    groundIntakeSubsystem.GroundIntakeStopCmd(),
+    //drive foward while set speaker angle
+    new ParallelCommandGroup(
+      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, 45),
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //shoot note
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //wait
+    new WaitCommand(.75),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd()
+    );
+  }
   // 2. driveAlongPathAuto(): drive robot along a pre-defined path
   public static Command driveAlongPathAuto(DriveSubsystem driveSubsystem) {
     // Create config for trajectory

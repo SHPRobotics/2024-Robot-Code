@@ -80,8 +80,8 @@ public class RobotContainer {
   // auto Command to strafe right 1 meter then stop (using 'Bangbang Control')
   private final Command m_StrafeDistanceAuto = Autos.StrafeDistanceAuto(m_robotDrive, false, 1.0);
 
-  // auto Command to drive forward 1 meter at an 30 degree angle (using 'Bangbang Control')
-  private final Command m_DriveAngleDistanceAuto = Autos.DriveAngleDistanceAuto(m_robotDrive, false, 4.0, 45);
+  // auto Command to strafe in a direction at an angle (using 'Bangbang Control')
+  private final Command m_DriveAngleDistanceAuto = Autos.DriveAngleDistanceAuto(m_robotDrive, false, 2.0, 45);
 
   // auto comand to rotate the robot at an angle
   private final Command m_RotateRobotAuto = Autos.RotateRobotAuto(m_robotDrive, false, 45);
@@ -92,11 +92,14 @@ public class RobotContainer {
   //test auton code for turning
   private final Command m_TurnTwice = Autos.turnTwice(m_robotDrive);
 
-  //auto command when robot is positioned at red 1
+  //2 Note auto command when robot is positioned at red 1
   private final Command m_Red1 = Autos.red1(m_robotDrive, m_arm, m_shooter, m_ground);
 
-  //auto command when robot is positioned at red 2
+  //2 Note auto command when robot is positioned at red 2
   private final Command m_Red2 = Autos.red2(m_robotDrive, m_arm, m_shooter, m_ground);
+
+  //4 Note auto command when robot is positioned at red 2
+  private final Command m_FullRed2 = Autos.fullRed2(m_robotDrive, m_arm, m_shooter, m_ground);
 
 /*            
   // Red 2
@@ -162,10 +165,12 @@ public class RobotContainer {
     m_chooser.addOption("Drive Along a Path", m_DriveAlongPathAuto);
     //test code for robot turning
     m_chooser.addOption("Turn Twice", m_TurnTwice);
-    //add auton command at red 1 position
+    //add 2 note auton command at red 1 position
     m_chooser.addOption("Red 1 Auto", m_Red1);
-    //add auton command at red 2 position
+    //add 2 note auton command at red 2 position
     m_chooser.addOption("Red 2 Auto", m_Red2);
+    //add 4 note auton command at red 2 position
+    m_chooser.addOption("4 Note Red 2 Auto", m_FullRed2);
 
     // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
     Shuffleboard.getTab("Autonomous").add(m_chooser);

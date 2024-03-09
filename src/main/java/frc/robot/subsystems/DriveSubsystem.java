@@ -354,7 +354,10 @@ public class DriveSubsystem extends SubsystemBase {
     //return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
     return Math.IEEEremainder(m_gyro.getAngle(), 360);
   }
-
+  public AHRS getGyro(){
+    return m_gyro;
+  }
+  
   public Rotation2d getRotation2d(){
     return Rotation2d.fromDegrees(getHeading());
   }
