@@ -219,7 +219,7 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
-    public static final double kAutoDriveSpeed = 0.25;  // speed of robot in Autonomous mode
+    public static final double kAutoDriveSpeed = 0.3; //0.25;  // speed of robot in Autonomous mode
     public static final double kAutoTurnSpeed = 0.3;  // speed of robot in Autonomous mode
     public static final double kAutoArmSpeed = 0.2; // speed of arm in Autonomous mode
 

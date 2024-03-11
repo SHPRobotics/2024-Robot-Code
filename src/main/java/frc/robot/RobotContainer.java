@@ -74,8 +74,8 @@ public class RobotContainer {
 
   // auton command to drive the robot forward for 1 meters (using 'Bangbang Control')
   private final Command m_DriveDistanceAuto = Autos.DriveDistanceAuto(m_robotDrive, false, 2.0);
-  // auton command to drive the robot forward for 1 meters (using 'PID Control')
-  private final Command m_DriveDistancePIDAuto = new DriveDistancePID(m_robotDrive, false, 1.0, 90.0);
+  // auton command to drive the robot backward for 1 meters (using 'PID Control')
+  private final Command m_DriveDistancePIDAuto = new DriveDistancePID(m_robotDrive, true, 3.0);
 
   // auto Command to strafe right 1 meter then stop (using 'Bangbang Control')
   private final Command m_StrafeDistanceAuto = Autos.StrafeDistanceAuto(m_robotDrive, false, 1.0);
@@ -171,6 +171,8 @@ public class RobotContainer {
     m_chooser.addOption("Red 2 Auto", m_Red2);
     //add 4 note auton command at red 2 position
     m_chooser.addOption("4 Note Red 2 Auto", m_FullRed2);
+    //add 4 note auton command at blue 2 position
+    m_chooser.addOption("4 Note Blue 2 Auto", m_FullRed2);
 
     // put the chooser on the Dashboard under "Autonomous" tab. If tab not exist, it creates the tab
     Shuffleboard.getTab("Autonomous").add(m_chooser);

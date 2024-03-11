@@ -259,6 +259,7 @@ public final class Autos {
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
     //position behind note by strafing at an angle
+    // beginning of 3rd note -- make sure to mirror
     DriveAngleDistanceAuto(driveSubsystem, true, 1.5, 60),
     //drive back while intaking
     new ParallelCommandGroup(
@@ -273,6 +274,29 @@ public final class Autos {
     //drive foward while set speaker angle
     new ParallelCommandGroup(
       DriveAngleDistanceAuto(driveSubsystem, false, 2.3, 45),
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //shoot note
+    shooterSubsystem.ShooterShootNoteOutCmd(),
+    //wait
+    new WaitCommand(.75),
+    //stop shooter
+    shooterSubsystem.ShooterStopCmd(),
+
+    // 4th note -- mirroring 3rd ----------------
+    DriveAngleDistanceAuto(driveSubsystem, true, 1.5, -60),
+    //drive back while intaking
+    new ParallelCommandGroup(
+      //bring arm down
+      new ArmDown(armSubsystem),
+      DriveDistanceAuto(driveSubsystem, true, 1),
+      groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
+    //wait
+    new WaitCommand(.75),
+    //stop ground intake
+    groundIntakeSubsystem.GroundIntakeStopCmd(),
+    //drive foward while set speaker angle
+    new ParallelCommandGroup(
+      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, -45),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
