@@ -40,7 +40,7 @@ public final class Autos {
   public static Command DriveDistanceAuto(DriveSubsystem driveSubsystem, boolean driveReversed, double distanceMeters){
     return new FunctionalCommand(
       // onInit: reset encoders on command start
-      driveSubsystem::resetEncoders,
+        driveSubsystem::resetEncoders,
 
       // onExecute: drive forward (if driveReversed = false) or reverse (if driveReversed = true) at an angle while command is executing
       // robot drives in robot-centric mode (fieldRelative = false)
@@ -95,7 +95,7 @@ public final class Autos {
                                  AutoConstants.kAutoDriveSpeed * (driveReversed ? -1 : 1) * Math.sin(Units.degreesToRadians(driveAngleDeg)),  
                              0, false, true), 
 */
-      ()-> driveSubsystem.omniDirectionStrafe(1* (driveReversed ? -1 : 1), driveAngleDeg),
+      ()-> driveSubsystem.omniDirectionStrafe(AutoConstants.kAutoOmniDirectionSpeed * (driveReversed ? -1 : 1), driveAngleDeg),
       // onEnd: stop driving at the end of command
       //interrupt -> driveSubsystem.setX(), 
       interrupt -> driveSubsystem.stop(), 
@@ -150,6 +150,8 @@ public final class Autos {
   }
   public static Command red1 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
     return Commands.sequence(
+      //start with arm down
+      //new ArmDown(armSubsystem),
       // set arm to speaker position
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
       new WaitCommand(1),
@@ -158,33 +160,42 @@ public final class Autos {
       new WaitCommand(1),
       //stop shooter
       shooterSubsystem.ShooterStopCmd(),
-      //Bring arm down
-      new ArmDown(armSubsystem),
-      // -drive back
-      DriveDistanceAuto(driveSubsystem, true, .5),
+      //Bring arm down while driving back
+      new ParallelCommandGroup(
+        new ArmDown(armSubsystem),
+        DriveDistanceAuto(driveSubsystem, true, 0.4)),      
       // -turn clockwise
-      RotateRobotAuto(driveSubsystem, true, -45),
+      RotateRobotAuto(driveSubsystem, true, 45),
       //drive back while intaking
       new ParallelCommandGroup(
-        DriveDistanceAuto(driveSubsystem, true, 1),
+        DriveDistanceAuto(driveSubsystem, true, 1.6),
         groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
       new WaitCommand(1),
       //stop Ground intake
       groundIntakeSubsystem.GroundIntakeStopCmd(),
-      //drive foward
-      DriveDistanceAuto(driveSubsystem, false, .5),
+      //drive foward while setting speaker angle
+      new ParallelCommandGroup(
+        DriveDistanceAuto(driveSubsystem, false, 1.6),
+        new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
       //turn counterclockwise
-      RotateRobotAuto(driveSubsystem, false, 45)/* ,
+      RotateRobotAuto(driveSubsystem, false, 45) ,
       //drive foward
-      DriveDistanceAuto(driveSubsystem, false, .6),
-      //set speaker angle
-      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
-      new WaitCommand(1),
+      DriveDistanceAuto(driveSubsystem, false, 0.6),
+      //wait to adjust
+      new WaitCommand(0.3),
       //shoot note
       shooterSubsystem.ShooterShootNoteOutCmd(),
       new WaitCommand(1),
       //stop shooter
-      shooterSubsystem.ShooterStopCmd()*/
+      shooterSubsystem.ShooterStopCmd(),
+      //bring arm down while driving back
+      new ParallelCommandGroup(
+        new ArmDown(armSubsystem),
+        DriveDistanceAuto(driveSubsystem, true, 0.4)),      
+      // -turn clockwise
+      RotateRobotAuto(driveSubsystem, true, 45),
+      //drive back behind line
+      DriveDistanceAuto(driveSubsystem, true, 1.6)
     );
   }
 
@@ -227,15 +238,15 @@ public final class Autos {
   }
   public static Command fullRed2 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
     return Commands.sequence(
-      /* //set arm zero
-    new ArmDown(armSubsystem),*/
+    //set arm zero
+    new ArmDown(armSubsystem),
     //set arm to speaker position
     new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
-    new WaitCommand(1.5),
+    new WaitCommand(1),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //waits
-    new WaitCommand(.75),
+    new WaitCommand(.5),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
     //drive back to note while intaking
@@ -245,17 +256,19 @@ public final class Autos {
       DriveDistanceAuto(driveSubsystem, true, 1.5),
       groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()), 
     //wait
-    new WaitCommand(.75),
+    new WaitCommand(0.75),
     //stop ground intake
     groundIntakeSubsystem.GroundIntakeStopCmd(), 
     //drive foward while setting arm angle
     new ParallelCommandGroup(
       DriveDistanceAuto(driveSubsystem, false, 1.55),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //wait to adjust
+    new WaitCommand(.3),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
-    new WaitCommand(.75),
+    new WaitCommand(.5),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
     //position behind note by strafing at an angle
@@ -273,12 +286,14 @@ public final class Autos {
     groundIntakeSubsystem.GroundIntakeStopCmd(),
     //drive foward while set speaker angle
     new ParallelCommandGroup(
-      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, 45),
+      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, 42.5),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //wait to adjust
+    new WaitCommand(0.3),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
-    new WaitCommand(.75),
+    new WaitCommand(.5),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
 
@@ -291,21 +306,74 @@ public final class Autos {
       DriveDistanceAuto(driveSubsystem, true, 1),
       groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
     //wait
-    new WaitCommand(.75),
+    new WaitCommand(0.75),
     //stop ground intake
     groundIntakeSubsystem.GroundIntakeStopCmd(),
     //drive foward while set speaker angle
     new ParallelCommandGroup(
-      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, -45),
+      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, -37.5),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
+    //wait to adjust
+    new WaitCommand(0.3),
     //shoot note
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
-    new WaitCommand(.75),
+    new WaitCommand(0.5),
     //stop shooter
-    shooterSubsystem.ShooterStopCmd()
+    shooterSubsystem.ShooterStopCmd(),
+    //drive behind line
+    DriveDistanceAuto(driveSubsystem, true, 2)
     );
   }
+
+
+
+public static Command red3 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
+    return Commands.sequence(
+      // set arm to speaker position
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      new WaitCommand(1),
+      // -shoot note into speaker
+      shooterSubsystem.ShooterShootNoteOutCmd(),
+      new WaitCommand(1),
+      //stop shooter
+      shooterSubsystem.ShooterStopCmd(),
+      //Bring arm down
+      new ArmDown(armSubsystem),
+      // -drive back
+      DriveDistanceAuto(driveSubsystem, true, .5),
+      // -turn clockwise
+      RotateRobotAuto(driveSubsystem, true, -45),
+      //drive back while intaking
+      new ParallelCommandGroup(
+        DriveDistanceAuto(driveSubsystem, true, 1),
+        groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
+      new WaitCommand(1),
+      //stop Ground intake
+      groundIntakeSubsystem.GroundIntakeStopCmd(),
+      //drive foward
+      DriveDistanceAuto(driveSubsystem, false, .5),
+      //turn counterclockwise
+      RotateRobotAuto(driveSubsystem, false, 45)/* ,
+      //drive foward
+      DriveDistanceAuto(driveSubsystem, false, .6),
+      //set speaker angle
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      new WaitCommand(1),
+      //shoot note
+      shooterSubsystem.ShooterShootNoteOutCmd(),
+      new WaitCommand(1),
+      //stop shooter
+      shooterSubsystem.ShooterStopCmd()*/
+    );
+  }
+
+
+
+
+
+
+
   // 2. driveAlongPathAuto(): drive robot along a pre-defined path
   public static Command driveAlongPathAuto(DriveSubsystem driveSubsystem) {
     // Create config for trajectory
