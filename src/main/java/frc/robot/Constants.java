@@ -163,7 +163,7 @@ public final class Constants {
   // ArmConstants ========================================================================
   public static final class ArmConstants {
     public static final int kArmMotorCANId = 7;
-	  public static final double kArmSpeed = 0.35; // 0.2;
+	  public static final double kArmSpeed = 0.25; // 0.2;
     public static final float kArmForwardLimit = 0;
     public static final float kArmReverseLimit = 0;
     public static final int limitSwitchChannel = 9;
@@ -171,7 +171,8 @@ public final class Constants {
     public static final double kArmAngleNeutral = 0;          // 
     public static final double kArmAngleSource = -20;      // 
     public static final double kArmAngleAmp = -47;       // 
-    public static final double kArmAngleSpeaker = -3;    // 
+    public static final double kArmAngleSpeaker = -3;    //
+    public static final double kArmAngleSideSpeaker = -2; // 
     //best fit equation for (angle, encoderValue) relationship: V = 
     
     //public static final double kInclinerAngleGroundIntake =  0; // change it to kArmAngleNeutral
@@ -219,8 +220,8 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
-    public static final double kAutoDriveSpeed = 0.35; //0.25;  // speed of robot in Autonomous mode
-    public static final double kAutoOmniDirectionSpeed = 2; //strafing speed of robot when using omnidirection method in autonomous mode in meters per second
+    public static final double kAutoDriveSpeed = 0.4; //0.25;  // speed of robot in Autonomous mode
+    public static final double kAutoOmniDirectionSpeed = 2.25; //strafing speed of robot when using omnidirection method in autonomous mode in meters per second
     public static final double kAutoTurnSpeed = 0.25;  // speed of robot in Autonomous mode
     //public static final double kAutoArmSpeed = 0.2; // speed of arm in Autonomous mode
 

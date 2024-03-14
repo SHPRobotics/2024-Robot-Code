@@ -24,7 +24,7 @@ public class DriveDistancePIDCustom extends Command {
   // motor output = kP x error
   //          0.5 = kP x distanceMeters
   // if distanceMeters = 10, kP = 0.5/10 = 0.05
-  private final double kP = 0.05; //0.05 (undershoot), 20 (oscillate), 10 (small oscillation), 0.5 (error = 0.2)
+  private final double kP = 0.2; //0.05 (undershoot), 20 (oscillate), 10 (small oscillation), 0.5 (error = 0.2)
   // initial guess of kI:
   // get the last error when only kP was involved, say 0.2, 
   // we want the integral term to increase 10% (0.1) every 1 sec
@@ -67,15 +67,15 @@ public class DriveDistancePIDCustom extends Command {
     double sensorPosition = m_driveSubsystem.getAverageEncoderDistance();
 
     // calculation error
-    double error = m_distanceMeters - sensorPosition;
+    double m_error = m_distanceMeters - sensorPosition;
     double dt = Timer.getFPGATimestamp() - m_lastTimeStamp;
 
     // add error only when error is small (ie < iLimit meter)
-    if (Math.abs(error) < iLimit){
-      m_errorSum += error * dt;
+    if (Math.abs(m_error) < iLimit){
+      m_errorSum += m_error * dt;
     }
 
-    double errorRate = (error - m_lastError) / dt;
+    double errorRate = (m_error - m_lastError) / dt;
 
     double outputSpeed = kP * m_error + kI * m_errorSum + kD * errorRate;
 
@@ -83,13 +83,15 @@ public class DriveDistancePIDCustom extends Command {
                            0, //outputSpeed * (m_driveReversed ? -1 : 1) * Math.cos(m_driveAngleDeg),
                        0, false, true);
 
+    SmartDashboard.putNumber("m_distanceMeters", m_distanceMeters);
     SmartDashboard.putNumber("error", m_error);
     SmartDashboard.putNumber("outputSpeed", outputSpeed);
+    SmartDashboard.putNumber("sensorPosition", sensorPosition);
     System.out.println(m_error+", " + outputSpeed +", "+sensorPosition);
 
     // update last - variables
     m_lastTimeStamp = Timer.getFPGATimestamp();
-    m_lastError = error;
+    m_lastError = m_error;
 
   }
 
@@ -97,6 +99,7 @@ public class DriveDistancePIDCustom extends Command {
   @Override
   public void end(boolean interrupted) {
     m_driveSubsystem.setX();
+    System.out.println("command finished");
   }
 
   // Returns true when the command should end.

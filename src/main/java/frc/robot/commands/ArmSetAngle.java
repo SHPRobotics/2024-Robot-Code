@@ -31,13 +31,13 @@ public class ArmSetAngle extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(m_armSubsystem.getArmPosition() > m_angle+1){ 
+    if(m_armSubsystem.getArmPosition() > m_angle+0.5){ 
       m_armSubsystem.armUp();
       m_armUp = true;
       m_armDown = false;
       System.out.println("Arm Up at position: "+m_armSubsystem.getArmPosition()+", target angle = "+ m_angle);
     }
-    else if(m_armSubsystem.getArmPosition() < m_angle-1){ 
+    else if(m_armSubsystem.getArmPosition() < m_angle-0.5){ 
       m_armSubsystem.armDown();
       m_armDown = true;
       m_armUp = false;

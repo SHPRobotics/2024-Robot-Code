@@ -43,7 +43,8 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.ArmDown;
 import frc.robot.commands.ArmSetAngle;
 import frc.robot.commands.Autos;
-import frc.robot.commands.DriveDistancePID;
+import frc.robot.commands.DriveDistancePIDCustom;
+import frc.robot.commands.DriveDistancePIDCustom2;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -75,7 +76,7 @@ public class RobotContainer {
   // auton command to drive the robot forward for 1 meters (using 'Bangbang Control')
   private final Command m_DriveDistanceAuto = Autos.DriveDistanceAuto(m_robotDrive, false, 2.0);
   // auton command to drive the robot backward for 1 meters (using 'PID Control')
-  private final Command m_DriveDistancePIDAuto = new DriveDistancePID(m_robotDrive, true, 3.0);
+  private final Command m_DriveDistancePIDAuto = new DriveDistancePIDCustom2(m_robotDrive, false, 3.0);
 
   // auto Command to strafe right 1 meter then stop (using 'Bangbang Control')
   private final Command m_StrafeDistanceAuto = Autos.StrafeDistanceAuto(m_robotDrive, false, 1.0);
@@ -100,6 +101,9 @@ public class RobotContainer {
 
   //4 Note auto command when robot is positioned at red 2
   private final Command m_FullRed2 = Autos.fullRed2(m_robotDrive, m_arm, m_shooter, m_ground);
+
+  //2 Note auto command when robot is positioned at red 3
+  private final Command m_Red3 = Autos.red3(m_robotDrive, m_arm, m_shooter, m_ground);
 
 /*            
   // Red 2
@@ -169,6 +173,8 @@ public class RobotContainer {
     m_chooser.addOption("Red 1 Auto", m_Red1);
     //add 2 note auton command at red 2 position
     m_chooser.addOption("Red 2 Auto", m_Red2);
+    //add 2 note auton command at red 3 position
+    m_chooser.addOption("Red 3 Auto", m_Red3);
     //add 4 note auton command at red 2 position
     m_chooser.addOption("4 Note Red 2 Auto", m_FullRed2);
     //add 4 note auton command at blue 2 position
@@ -254,25 +260,10 @@ public class RobotContainer {
     m_operatorController.x()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSource))
                         ;
-   
-////
-    // press button B of operator joystick to set the arm to its neutral position
-    // command ArmSetAngle will run only if LimitSwitch is not pressed
-    //m_operatorController.b()
-    //                    .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleNeutral))
-                        //              .unless(() -> !m_arm.iSLimitSwitchPressed()))
-                        //.whileTrue(new RunCommand(()-> m_arm.isLimitSwitch(), m_arm))
-
-                        ;
-                        //while (true){if (ArmSubsystem.isLimitSwitch){m_ArmEncoder.reset();}}
-
-
-                        // neutral or left shoulder...
-                        // continuously check if the button is pressed, and if the button is pressed, stop the motor immediately and set the encoder value to 0
-                        
-                      
-
-////
+    // press button B of operator joystick to set the arm to the side Speaker position
+    m_operatorController.b()
+                        .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleSideSpeaker))
+                        ;    
     // press button A of operator joystick to set the arm to the Amp position
     m_operatorController.a()
                         .whileTrue(new ArmSetAngle(m_arm, ArmConstants.kArmAngleAmp))

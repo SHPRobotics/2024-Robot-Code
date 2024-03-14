@@ -151,9 +151,12 @@ public final class Autos {
   public static Command red1 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
     return Commands.sequence(
       //start with arm down
-      //new ArmDown(armSubsystem),
+      new ArmDown(armSubsystem),
       // set arm to speaker position
-      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      //new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      //wait to adjust
+      new WaitCommand(2),
+      shooterSubsystem.ShooterFeedNoteInCmd(),
       new WaitCommand(1),
       // -shoot note into speaker
       shooterSubsystem.ShooterShootNoteOutCmd(),
@@ -163,14 +166,14 @@ public final class Autos {
       //Bring arm down while driving back
       new ParallelCommandGroup(
         new ArmDown(armSubsystem),
-        DriveDistanceAuto(driveSubsystem, true, 0.4)),      
+        DriveDistanceAuto(driveSubsystem, true, 0.3)),      
       // -turn clockwise
       RotateRobotAuto(driveSubsystem, true, 45),
       //drive back while intaking
       new ParallelCommandGroup(
         DriveDistanceAuto(driveSubsystem, true, 1.6),
         groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
-      new WaitCommand(1),
+      new WaitCommand(0.75),
       //stop Ground intake
       groundIntakeSubsystem.GroundIntakeStopCmd(),
       //drive foward while setting speaker angle
@@ -179,10 +182,14 @@ public final class Autos {
         new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
       //turn counterclockwise
       RotateRobotAuto(driveSubsystem, false, 45) ,
+      //wait 
+      new WaitCommand(0.3),
       //drive foward
-      DriveDistanceAuto(driveSubsystem, false, 0.6),
+      DriveDistanceAuto(driveSubsystem, false, 0.35),
       //wait to adjust
       new WaitCommand(0.3),
+      shooterSubsystem.ShooterFeedNoteInCmd(),
+      new WaitCommand(1),
       //shoot note
       shooterSubsystem.ShooterShootNoteOutCmd(),
       new WaitCommand(1),
@@ -195,7 +202,7 @@ public final class Autos {
       // -turn clockwise
       RotateRobotAuto(driveSubsystem, true, 45),
       //drive back behind line
-      DriveDistanceAuto(driveSubsystem, true, 1.6)
+      DriveDistanceAuto(driveSubsystem, true, 2)
     );
   }
 
@@ -206,7 +213,7 @@ public final class Autos {
     //set arm to speaker position
     new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
     new WaitCommand(1),
-    //shoot note
+    //shoot note 1
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
     new WaitCommand(1),
@@ -226,7 +233,9 @@ public final class Autos {
     new ParallelCommandGroup(
       DriveDistanceAuto(driveSubsystem, false, 1.6),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
-    //shoot note
+
+    new WaitCommand(0.5), // added per Ndu
+    //shoot note 2
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
     new WaitCommand(1),
@@ -243,7 +252,7 @@ public final class Autos {
     //set arm to speaker position
     new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
     new WaitCommand(1),
-    //shoot note
+    //shoot note 1
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //waits
     new WaitCommand(.5),
@@ -265,7 +274,7 @@ public final class Autos {
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
     //wait to adjust
     new WaitCommand(.3),
-    //shoot note
+    //shoot note 2
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
     new WaitCommand(.5),
@@ -273,7 +282,7 @@ public final class Autos {
     shooterSubsystem.ShooterStopCmd(),
     //position behind note by strafing at an angle
     // beginning of 3rd note -- make sure to mirror
-    DriveAngleDistanceAuto(driveSubsystem, true, 1.5, 60),
+    DriveAngleDistanceAuto(driveSubsystem, true, 1.2, 60),
     //drive back while intaking
     new ParallelCommandGroup(
       //bring arm down
@@ -286,19 +295,19 @@ public final class Autos {
     groundIntakeSubsystem.GroundIntakeStopCmd(),
     //drive foward while set speaker angle
     new ParallelCommandGroup(
-      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, 42.5),
+      DriveAngleDistanceAuto(driveSubsystem, false, 2, 42.5),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
     //wait to adjust
     new WaitCommand(0.3),
-    //shoot note
+    //shoot note 3
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
     new WaitCommand(.5),
     //stop shooter
     shooterSubsystem.ShooterStopCmd(),
-
+    new WaitCommand(.2),
     // 4th note -- mirroring 3rd ----------------
-    DriveAngleDistanceAuto(driveSubsystem, true, 1.5, -60),
+    DriveAngleDistanceAuto(driveSubsystem, true, 1.3, -60),
     //drive back while intaking
     new ParallelCommandGroup(
       //bring arm down
@@ -311,11 +320,11 @@ public final class Autos {
     groundIntakeSubsystem.GroundIntakeStopCmd(),
     //drive foward while set speaker angle
     new ParallelCommandGroup(
-      DriveAngleDistanceAuto(driveSubsystem, false, 2.3, -37.5),
+      DriveAngleDistanceAuto(driveSubsystem, false, 2.1, -37.5),
       new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker)),
     //wait to adjust
     new WaitCommand(0.3),
-    //shoot note
+    //shoot note 4
     shooterSubsystem.ShooterShootNoteOutCmd(),
     //wait
     new WaitCommand(0.5),
@@ -330,41 +339,59 @@ public final class Autos {
 
 public static Command red3 (DriveSubsystem driveSubsystem, ArmSubsystem armSubsystem, ShooterSubsystem shooterSubsystem, GroundIntakeSubsystem groundIntakeSubsystem){
     return Commands.sequence(
-      // set arm to speaker position
-      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      //start with arm down
+      new ArmDown(armSubsystem),
+      // set arm to side speaker position
+      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSideSpeaker),
+      //wait to adjust
+      new WaitCommand(2),
+      shooterSubsystem.ShooterFeedNoteInCmd(),
       new WaitCommand(1),
       // -shoot note into speaker
       shooterSubsystem.ShooterShootNoteOutCmd(),
       new WaitCommand(1),
       //stop shooter
       shooterSubsystem.ShooterStopCmd(),
-      //Bring arm down
-      new ArmDown(armSubsystem),
-      // -drive back
-      DriveDistanceAuto(driveSubsystem, true, .5),
+      //Bring arm down while driving back
+      new ParallelCommandGroup(
+        new ArmDown(armSubsystem),
+        DriveDistanceAuto(driveSubsystem, true, 0.2)),      
       // -turn clockwise
-      RotateRobotAuto(driveSubsystem, true, -45),
+      RotateRobotAuto(driveSubsystem, false, 47),
       //drive back while intaking
       new ParallelCommandGroup(
-        DriveDistanceAuto(driveSubsystem, true, 1),
+        DriveDistanceAuto(driveSubsystem, true, 1.6),
         groundIntakeSubsystem.GroundIntakeFeedNoteInCmd()),
-      new WaitCommand(1),
+      new WaitCommand(0.75),
       //stop Ground intake
       groundIntakeSubsystem.GroundIntakeStopCmd(),
-      //drive foward
-      DriveDistanceAuto(driveSubsystem, false, .5),
+      //drive foward while setting speaker angle
+      new ParallelCommandGroup(
+        DriveDistanceAuto(driveSubsystem, false, 1.6),
+        new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSideSpeaker)),
       //turn counterclockwise
-      RotateRobotAuto(driveSubsystem, false, 45)/* ,
+      RotateRobotAuto(driveSubsystem, true, 47) ,
+      //wait 
+      new WaitCommand(0.3),
       //drive foward
-      DriveDistanceAuto(driveSubsystem, false, .6),
-      //set speaker angle
-      new ArmSetAngle(armSubsystem, ArmConstants.kArmAngleSpeaker),
+      DriveDistanceAuto(driveSubsystem, false, 0.25),
+      //wait to adjust
+      new WaitCommand(0.3),
+      shooterSubsystem.ShooterFeedNoteInCmd(),
       new WaitCommand(1),
       //shoot note
       shooterSubsystem.ShooterShootNoteOutCmd(),
       new WaitCommand(1),
       //stop shooter
-      shooterSubsystem.ShooterStopCmd()*/
+      shooterSubsystem.ShooterStopCmd(),
+      //bring arm down while driving back
+      new ParallelCommandGroup(
+        new ArmDown(armSubsystem),
+        DriveDistanceAuto(driveSubsystem, true, 0.4)),      
+      // -turn clockwise
+      RotateRobotAuto(driveSubsystem, false, 47),
+      //drive back behind line
+      DriveDistanceAuto(driveSubsystem, true, 2)
     );
   }
 
